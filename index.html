@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="app">
+    <div id="header">
         <h1>System Usability Scale (SUS) Toolkit</h1>
+        <a href="#" id="backToStartpage">Back to Startpage</a>
+    </div>
+    <div id="app">
         <input type="file" id="fileInput" accept=".csv" />
         <button id="processButton">Process File</button>
         <div id="output"></div>
@@ -16,11 +19,11 @@
             <button class="tab-button active" onclick="openTab('chartContainer')">Charts</button>
             <button class="tab-button" onclick="openTab('tableContainer')">Table</button>
         </div>
-        <div id="chartContainer" class="tab-content">
+        <div id="chartContainer" class="tab-content active">
             <div id="barChart"></div>
             <div id="radarChart"></div>
         </div>
-        <div id="tableContainer" class="tab-content" style="display:none;">
+        <div id="tableContainer" class="tab-content">
             <table id="dataTable"></table>
         </div>
     </div>

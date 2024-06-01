@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputDiv = document.getElementById('output');
     const barChartDiv = document.getElementById('barChart');
     const radarChartDiv = document.getElementById('radarChart');
+    const dataTable = document.getElementById('dataTable');
 
     processButton.addEventListener('click', () => {
         const file = fileInput.files[0];
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     outputDiv.innerHTML = `<p>Average SUS Score: ${averageScore.toFixed(2)}</p>`;
                     renderBarChart(scores);
                     renderRadarChart(susData);
+                    renderTable(susData);
                 }
             });
         } else {
@@ -61,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        vegaEmbed('#barChart', barChartSpec);
+        vegaEmbed('#barChart', barChartSpec).catch(console.error);
     }
 
     function renderRadarChart(data) {
@@ -91,10 +93,57 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        vegaEmbed('#radarChart', radarChartSpec);
+        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
+    }
+
+    function renderTable(data) {
+        dataTable.innerHTML = `
+            <tr>
+                <th>User</th>
+                <th>Q1</th>
+                <th>Q2</th>
+                <th>Q3</th>
+                <th>Q4</th>
+                <th>Q5</th>
+                <th>Q6</th>
+                <th>Q7</th>
+                <th>Q8</th>
+                <th>Q9</th>
+                <th>Q10</th>
+            </tr>
+            ${data.map((row, index) => `
+                <tr>
+                    <td>User ${index + 1}</td>
+                    <td>${row.Q1}</td>
+                    <td>${row.Q2}</td>
+                    <td>${row.Q3}</td>
+                    <td>${row.Q4}</td>
+                    <td>${row.Q5}</td>
+                    <td>${row.Q6}</td>
+                    <td>${row.Q7}</td>
+                    <td>${row.Q8}</td>
+                    <td>${row.Q9}</td>
+                    <td>${row.Q10}</td>
+                </tr>`).join('')}
+        `;
     }
 
     function average(arr) {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
 });
+
+// Tab functionality
+function openTab(tabName) {
+    const tabs = document.getElementsByClassName('tab-content');
+    for (let tab of tabs) {
+        tab.style.display = 'none';
+    }
+    document.getElementById(tabName).style.display = 'block';
+
+    const tabButtons = document.getElementsByClassName('tab-button');
+    for (let button of tabButtons) {
+        button.classList.remove('active');
+    }
+    document.querySelector(`button[onclick="openTab('${tabName}')"]`).classList.add('active');
+}

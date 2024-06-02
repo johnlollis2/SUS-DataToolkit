@@ -178,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     downloadButton.addEventListener('click', () => {
-        // Assuming barChartDiv contains the chart to download
         const chart = document.querySelector('#barChart canvas');
         if (chart) {
             const link = document.createElement('a');
@@ -198,3 +197,8 @@ function openTab(tabName) {
     document.getElementById(tabName).style.display = 'block';
 
     const tabButtons = document.getElementsByClassName('tab-button');
+    for (let button of tabButtons) {
+        button.classList.remove('active');
+    }
+    document.querySelector(`button[onclick="openTab('${tabName}')"]`).classList.add('active');
+}

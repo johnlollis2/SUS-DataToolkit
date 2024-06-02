@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateSUSScores(data) {
         return data.map(item => {
-            const positiveScores = item.Q1 + item.Q3 + item.Q5 + item.Q7 + item.Q9;
-            const negativeScores = 5 - item.Q2 + 5 - item.Q4 + 5 - item.Q6 + 5 - item.Q8 + 5 - item.Q10;
+            const positiveScores = (item.Q1 - 1) + (item.Q3 - 1) + (item.Q5 - 1) + (item.Q7 - 1) + (item.Q9 - 1);
+            const negativeScores = (5 - item.Q2) + (5 - item.Q4) + (5 - item.Q6) + (5 - item.Q8) + (5 - item.Q10);
             return (positiveScores + negativeScores) * 2.5;
         });
     }
@@ -198,8 +198,3 @@ function openTab(tabName) {
     document.getElementById(tabName).style.display = 'block';
 
     const tabButtons = document.getElementsByClassName('tab-button');
-    for (let button of tabButtons) {
-        button.classList.remove('active');
-    }
-    document.querySelector(`button[onclick="openTab('${tabName}')"]`).classList.add('active');
-}

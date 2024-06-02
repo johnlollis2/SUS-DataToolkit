@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputDiv = document.getElementById('output');
     const barChartDiv = document.getElementById('barChart');
     const radarChartDiv = document.getElementById('radarChart');
+    const heatmapContainer = document.getElementById('heatmapContainer');
     const dataTable = document.getElementById('dataTable');
     const interpretationPanel = document.getElementById('interpretationPanel');
     const downloadButton = document.getElementById('downloadButton');
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     outputDiv.innerHTML = `<p>Average SUS Score: ${averageScore.toFixed(2)}</p>`;
                     renderBarChart(scores);
                     renderRadarChart(susData);
+                    renderHeatmap(susData);
                     renderTable(susData);
                     updateInterpretationPanel(averageScore, scores);
                 }
@@ -97,6 +99,35 @@ document.addEventListener('DOMContentLoaded', () => {
         vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
     }
 
+    function renderHeatmap(data) {
+        const values = data.flatMap((user, index) => [
+            { user: `User ${index + 1}`, question: 'Q1', score: user.Q1 },
+            { user: `User ${index + 1}`, question: 'Q2', score: user.Q2 },
+            { user: `User ${index + 1}`, question: 'Q3', score: user.Q3 },
+            { user: `User ${index + 1}`, question: 'Q4', score: user.Q4 },
+            { user: `User ${index + 1}`, question: 'Q5', score: user.Q5 },
+            { user: `User ${index + 1}`, question: 'Q6', score: user.Q6 },
+            { user: `User ${index + 1}`, question: 'Q7', score: user.Q7 },
+            { user: `User ${index + 1}`, question: 'Q8', score: user.Q8 },
+            { user: `User ${index + 1}`, question: 'Q9', score: user.Q9 },
+            { user: `User ${index + 1}`, question: 'Q10', score: user.Q10 },
+        ]);
+
+        const heatmapSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+            description: 'A heatmap of SUS responses.',
+            data: { values },
+            mark: 'rect',
+            encoding: {
+                x: { field: 'question', type: 'ordinal', axis: { title: 'Question' } },
+                y: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
+                color: { field: 'score', type: 'quantitative', scale: { scheme: 'blues' }, legend: { title: 'Score' } }
+            }
+        };
+
+        vegaEmbed('#heatmapContainer', heatmapSpec).catch(console.error);
+    }
+
     function renderTable(data) {
         dataTable.innerHTML = `
             <tr>
@@ -158,47 +189,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getAdjectiveRating(score) {
         if (score >= 85) return 'Excellent';
-        if (score >= 70) return 'Good';
-        if (score >= 50) return 'OK';
-        if (score >= 30) return 'Poor';
-        return 'Very Poor';
+                if (score >= 70) return 'Good';
+        if (score >= 50) return 'Okay';
+        return 'Poor';
     }
 
     function getGradeRating(score) {
         if (score >= 85) return 'A';
         if (score >= 70) return 'B';
         if (score >= 50) return 'C';
-        if (score >= 30) return 'D';
-        return 'F';
+        return 'D';
     }
 
     function getAcceptabilityRating(score) {
         if (score >= 70) return 'Acceptable';
+        if (score >= 50) return 'Marginal';
         return 'Not Acceptable';
     }
 
     downloadButton.addEventListener('click', () => {
-        const chart = document.querySelector('#barChart canvas');
-        if (chart) {
-            const link = document.createElement('a');
-            link.href = chart.toDataURL('image/png');
-            link.download = 'SUS_chart.png';
-            link.click();
-        }
+        const csvData = Papa.unparse({
+            fields: ["User", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10"],
+            data: susData.map((row, index) => [
+                `User ${index + 1}`, row.Q1, row.Q2, row.Q3, row.Q4, row.Q5, row.Q6, row.Q7, row.Q8, row.Q9, row.Q10
+            ])
+        });
+        
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'sus_data.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     });
+
 });
-
-// Tab functionality
-function openTab(tabName) {
-    const tabs = document.getElementsByClassName('tab-content');
-    for (let tab of tabs) {
-        tab.style.display = 'none';
-    }
-    document.getElementById(tabName).style.display = 'block';
-
-    const tabButtons = document.getElementsByClassName('tab-button');
-    for (let button of tabButtons) {
-        button.classList.remove('active');
-    }
-    document.querySelector(`[onclick="openTab('${tabName}')"]`).classList.add('active');
-}

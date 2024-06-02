@@ -15,6 +15,16 @@ body {
     text-align: center;
     padding: 20px 0;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+#header .logo {
+    position: absolute;
+    left: 20px;
+    height: 60px;
 }
 
 #header h1 {
@@ -30,6 +40,12 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     margin-top: 20px;
+}
+
+.analysis-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
 .analysis-button {

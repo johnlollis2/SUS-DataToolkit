@@ -14,35 +14,49 @@ document.addEventListener('DOMContentLoaded', () => {
     processButton.addEventListener('click', () => {
         const file = fileInput.files[0];
         if (file) {
+            console.log('File selected:', file); // Debug log
             Papa.parse(file, {
                 header: true,
                 complete: function(results) {
                     console.log('Parsed Results:', results); // Debug log
 
-                    susData = results.data.map(row => ({
-                        Q1: parseInt(row.Q1),
-                        Q2: parseInt(row.Q2),
-                        Q3: parseInt(row.Q3),
-                        Q4: parseInt(row.Q4),
-                        Q5: parseInt(row.Q5),
-                        Q6: parseInt(row.Q6),
-                        Q7: parseInt(row.Q7),
-                        Q8: parseInt(row.Q8),
-                        Q9: parseInt(row.Q9),
-                        Q10: parseInt(row.Q10)
-                    }));
+                    // Check if results data is as expected
+                    if (results.data && results.data.length > 0) {
+                        susData = results.data.map(row => ({
+                            Q1: parseInt(row.Q1),
+                            Q2: parseInt(row.Q2),
+                            Q3: parseInt(row.Q3),
+                            Q4: parseInt(row.Q4),
+                            Q5: parseInt(row.Q5),
+                            Q6: parseInt(row.Q6),
+                            Q7: parseInt(row.Q7),
+                            Q8: parseInt(row.Q8),
+                            Q9: parseInt(row.Q9),
+                            Q10: parseInt(row.Q10)
+                        }));
 
-                    console.log('SUS Data:', susData); // Debug log
+                        console.log('SUS Data:', susData); // Debug log
 
-                    const scores = calculateSUSScores(susData);
-                    const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+                        const scores = calculateSUSScores(susData);
+                        console.log('SUS Scores:', scores); // Debug log
 
-                    outputDiv.innerHTML = `<p>Average SUS Score: ${averageScore.toFixed(2)}</p>`;
-                    renderBarChart(scores);
-                    renderRadarChart(susData);
-                    renderHeatmap(susData);
-                    renderTable(susData);
-                    updateInterpretationPanel(averageScore, scores);
+                        const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+                        console.log('Average SUS Score:', averageScore); // Debug log
+
+                        outputDiv.innerHTML = `<p>Average SUS Score: ${averageScore.toFixed(2)}</p>`;
+                        renderBarChart(scores);
+                        renderRadarChart(susData);
+                        renderHeatmap(susData);
+                        renderTable(susData);
+                        updateInterpretationPanel(averageScore, scores);
+                    } else {
+                        console.error('No valid data found in the file.');
+                        alert('No valid data found in the file.');
+                    }
+                },
+                error: function(error) {
+                    console.error('Error parsing file:', error); // Debug log
+                    alert('Error parsing file. Please check the file format.');
                 }
             });
         } else {
@@ -59,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBarChart(scores) {
+        console.log('Rendering bar chart with scores:', scores); // Debug log
         const barChartSpec = {
             $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
             description: 'A bar chart of SUS scores.',
@@ -76,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderRadarChart(data) {
+        console.log('Rendering radar chart with data:', data); // Debug log
         const averageScores = {
             Q1: average(data.map(item => item.Q1)),
             Q2: average(data.map(item => item.Q2)),
@@ -108,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderHeatmap(data) {
+        console.log('Rendering heatmap with data:', data); // Debug log
         const values = data.flatMap((user, index) => [
             { user: `User ${index + 1}`, question: 'Q1', score: user.Q1 },
             { user: `User ${index + 1}`, question: 'Q2', score: user.Q2 },
@@ -139,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTable(data) {
+        console.log('Rendering table with data:', data); // Debug log
         dataTable.innerHTML = `
             <tr>
                 <th>User</th>
@@ -171,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateInterpretationPanel(averageScore, scores) {
+        console.log('Updating interpretation panel with average score:', averageScore, 'and scores:', scores); // Debug log
         interpretationPanel.innerHTML = `
             <h3>Score and Interpretation:</h3>
             <p>SUS Study Score: ${averageScore.toFixed(2)}</p>

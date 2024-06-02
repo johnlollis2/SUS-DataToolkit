@@ -22,12 +22,6 @@ body {
     font-size: 2em;
 }
 
-#header a {
-    color: #ecf0f1;
-    text-decoration: none;
-    font-size: 1em;
-}
-
 #app {
     width: 80%;
     max-width: 800px;

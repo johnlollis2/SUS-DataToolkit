@@ -3,36 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUS Toolkit</title>
-    <link rel="stylesheet" href="Constyles.css">
+    <title>SUS Toolkit - Start</title>
+    <link rel="stylesheet" href="start.css">
 </head>
 <body>
     <div id="header">
         <h1>System Usability Scale (SUS) Toolkit</h1>
     </div>
-    <div id="app">
-        <input type="file" id="fileInput" accept=".csv" />
-        <button id="processButton">Process File</button>
-        <div id="output"></div>
-        <div class="tabs">
-            <button class="tab-button active" onclick="openTab('chartContainer')">Charts</button>
-            <button class="tab-button" onclick="openTab('tableContainer')">Table</button>
+    <div id="content">
+        <button class="analysis-button" onclick="location.href='Analysis.html'">Run Analysis</button>
+        <div class="or-section">
+            <span>Or</span>
+            <input type="file" id="fileInput" accept=".csv">
+            <button id="processButton">Process File</button>
         </div>
-        <div id="chartContainer" class="tab-content active">
-            <div id="barChart"></div>
-            <div id="radarChart"></div>
-            <div id="heatmapContainer"></div>
-            <div id="interpretationPanel"></div>
-            <button id="downloadButton">Download Data</button>
-        </div>
-        <div id="tableContainer" class="tab-content">
-            <table id="dataTable"></table>
+        <div class="accordion">
+            <button class="accordion-button">What is the System Usability Scale (SUS)?</button>
+            <div class="accordion-content">
+                <p>The System Usability Scale (SUS) is a reliable tool for measuring the usability. It consists of a 10 item questionnaire with five response options for respondents; from Strongly agree to Strongly disagree.</p>
+            </div>
+            <button class="accordion-button">What is the "SUS Analysis Toolkit"?</button>
+            <div class="accordion-content">
+                <p>The SUS Analysis Toolkit is a comprehensive tool for analyzing SUS data. It helps you visualize and interpret the results easily.</p>
+            </div>
+            <button class="accordion-button">How can I use the "SUS Analysis Toolkit"?</button>
+            <div class="accordion-content">
+                <p>You can use the toolkit to upload your SUS survey data and get visualizations and interpretations of the SUS scores.</p>
+            </div>
+            <button class="accordion-button">Licensing and Acknowledgement</button>
+            <div class="accordion-content">
+                <p>The SUS Analysis Toolkit is an open-source project licensed under the MIT license. Please acknowledge the contributors if you use it.</p>
+            </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
-    <script src="MyApp.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const acc = document.getElementsByClassName("accordion-button");
+            for (let i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    const panel = this.nextElementSibling;
+                    if (panel.style.display === "block") {
+                        panel.style.display = "none";
+                    } else {
+                        panel.style.display = "block";
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

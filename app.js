@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputDiv = document.getElementById('output');
     const barChartDiv = document.getElementById('barChart');
     const radarChartDiv = document.getElementById('radarChart');
+    const dataTable = document.getElementById('dataTable');
+    const interpretationPanel = document.getElementById('interpretationPanel');
+    const downloadButton = document.getElementById('downloadButton');
 
     processButton.addEventListener('click', () => {
         const file = fileInput.files[0];
@@ -11,20 +14,18 @@ document.addEventListener('DOMContentLoaded', () => {
             Papa.parse(file, {
                 header: true,
                 complete: function(results) {
-                    const susData = results.data.map(row => {
-                        return {
-                            Q1: parseInt(row.Q1),
-                            Q2: parseInt(row.Q2),
-                            Q3: parseInt(row.Q3),
-                            Q4: parseInt(row.Q4),
-                            Q5: parseInt(row.Q5),
-                            Q6: parseInt(row.Q6),
-                            Q7: parseInt(row.Q7),
-                            Q8: parseInt(row.Q8),
-                            Q9: parseInt(row.Q9),
-                            Q10: parseInt(row.Q10)
-                        };
-                    });
+                    const susData = results.data.map(row => ({
+                        Q1: parseInt(row.Q1),
+                        Q2: parseInt(row.Q2),
+                        Q3: parseInt(row.Q3),
+                        Q4: parseInt(row.Q4),
+                        Q5: parseInt(row.Q5),
+                        Q6: parseInt(row.Q6),
+                        Q7: parseInt(row.Q7),
+                        Q8: parseInt(row.Q8),
+                        Q9: parseInt(row.Q9),
+                        Q10: parseInt(row.Q10)
+                    }));
 
                     const scores = calculateSUSScores(susData);
                     const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
@@ -32,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     outputDiv.innerHTML = `<p>Average SUS Score: ${averageScore.toFixed(2)}</p>`;
                     renderBarChart(scores);
                     renderRadarChart(susData);
+                    renderTable(susData);
+                    updateInterpretationPanel(averageScore, scores);
                 }
             });
         } else {
@@ -41,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateSUSScores(data) {
         return data.map(item => {
-            const positiveScores = item.Q1 + item.Q3 + item.Q5 + item.Q7 + item.Q9;
-            const negativeScores = 5 - item.Q2 + 5 - item.Q4 + 5 - item.Q6 + 5 - item.Q8 + 5 - item.Q10;
+            const positiveScores = (item.Q1 - 1) + (item.Q3 - 1) + (item.Q5 - 1) + (item.Q7 - 1) + (item.Q9 - 1);
+            const negativeScores = (5 - item.Q2) + (5 - item.Q4) + (5 - item.Q6) + (5 - item.Q8) + (5 - item.Q10);
             return (positiveScores + negativeScores) * 2.5;
         });
     }
@@ -61,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        vegaEmbed('#barChart', barChartSpec);
+        vegaEmbed('#barChart', barChartSpec).catch(console.error);
     }
 
     function renderRadarChart(data) {
@@ -91,10 +94,107 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        vegaEmbed('#radarChart', radarChartSpec);
+        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
+    }
+
+    function renderTable(data) {
+        dataTable.innerHTML = `
+            <tr>
+                <th>User</th>
+                <th>Q1</th>
+                <th>Q2</th>
+                <th>Q3</th>
+                <th>Q4</th>
+                <th>Q5</th>
+                <th>Q6</th>
+                <th>Q7</th>
+                <th>Q8</th>
+                <th>Q9</th>
+                <th>Q10</th>
+            </tr>
+            ${data.map((row, index) => `
+                <tr>
+                    <td>User ${index + 1}</td>
+                    <td>${row.Q1}</td>
+                    <td>${row.Q2}</td>
+                    <td>${row.Q3}</td>
+                    <td>${row.Q4}</td>
+                    <td>${row.Q5}</td>
+                    <td>${row.Q6}</td>
+                    <td>${row.Q7}</td>
+                    <td>${row.Q8}</td>
+                    <td>${row.Q9}</td>
+                    <td>${row.Q10}</td>
+                </tr>`).join('')}
+        `;
+    }
+
+    function updateInterpretationPanel(averageScore, scores) {
+        interpretationPanel.innerHTML = `
+            <h3>Score and Interpretation:</h3>
+            <p>SUS Study Score: ${averageScore.toFixed(2)}</p>
+            <p>Median: ${median(scores)}</p>
+            <p>Standard Dev.: ${standardDeviation(scores).toFixed(2)}</p>
+            <p>Adjective: ${getAdjectiveRating(averageScore)}</p>
+            <p>Grade: ${getGradeRating(averageScore)}</p>
+            <p>Acceptability: ${getAcceptabilityRating(averageScore)}</p>
+        `;
     }
 
     function average(arr) {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
+
+    function median(arr) {
+        const sorted = arr.slice().sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
+    function standardDeviation(arr) {
+        const mean = average(arr);
+        return Math.sqrt(arr.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / arr.length);
+    }
+
+    function getAdjectiveRating(score) {
+        if (score >= 85) return 'Excellent';
+        if (score >= 70) return 'Good';
+        if (score >= 50) return 'OK';
+        if (score >= 30) return 'Poor';
+        return 'Very Poor';
+    }
+
+    function getGradeRating(score) {
+        if (score >= 85) return 'A';
+        if (score >= 70) return 'B';
+        if (score >= 50) return 'C';
+        if (score >= 30) return 'D';
+        return 'F';
+    }
+
+    function getAcceptabilityRating(score) {
+        if (score >= 70) return 'Acceptable';
+        return 'Not Acceptable';
+    }
+
+    downloadButton.addEventListener('click', () => {
+        // Assuming barChartDiv contains the chart to download
+        const chart = document.querySelector('#barChart canvas');
+        if (chart) {
+            const link = document.createElement('a');
+            link.href = chart.toDataURL('image/png');
+            link.download = 'SUS_chart.png';
+            link.click();
+        }
+    });
 });
+
+// Tab functionality
+function openTab(tabName) {
+    const tabs = document.getElementsByClassName('tab-content');
+    for (let tab of tabs) {
+        tab.style.display = 'none';
+    }
+    document.getElementById(tabName).style.display = 'block';
+
+    const tabButtons = document.getElementsByClassName('tab-button');

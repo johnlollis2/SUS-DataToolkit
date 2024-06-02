@@ -199,6 +199,4 @@ function openTab(tabName) {
     const tabButtons = document.getElementsByClassName('tab-button');
     for (let button of tabButtons) {
         button.classList.remove('active');
-    }
-    document.querySelector(`button[onclick="openTab('${tabName}')"]`).classList.add('active');
-}
+   

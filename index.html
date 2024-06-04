@@ -20,6 +20,13 @@
             <input type="file" id="fileInput" accept=".csv">
             <button id="processButton">Process File</button>
         </div>
+        <div id="chartContainer">
+            <div id="barChart"></div>
+            <div id="radarChart"></div>
+        </div>
+        <div id="tableContainer">
+            <table id="dataTable"></table>
+        </div>
         <div class="accordion">
             <button class="accordion-button">What is the System Usability Scale (SUS)?</button>
             <div class="accordion-content">
@@ -39,21 +46,10 @@
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const acc = document.getElementsByClassName("accordion-button");
-            for (let i = 0; i < acc.length; i++) {
-                acc[i].addEventListener("click", function() {
-                    this.classList.toggle("active");
-                    const panel = this.nextElementSibling;
-                    if (panel.style.display === "block") {
-                        panel.style.display = "none";
-                    } else {
-                        panel.style.display = "block";
-                    }
-                });
-            }
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+    <script src="MyApp.js"></script>
 </body>
 </html>

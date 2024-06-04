@@ -128,3 +128,37 @@ th {
     border: none;
     border-radius: 5px;
 }
+
+#mainPageDownloadPanel {
+    align-items: center;
+    height: 10em;
+    border-width: 1px;
+    border-style: dashed;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    background-color: #FFFFFF;
+    box-shadow: 0 .5rem 1rem -.5rem rgba(0, 0, 0, .4);
+    color: black;
+    font-family: monospace;
+    margin-top: 20px;
+}
+
+#editableTableData {
+    border: 1px double lightgray;
+}
+
+#editableTableData.error {
+    border: 3px double #FF0033;
+}
+
+#tableErrorIcon {
+    display: none;
+}
+
+#tableErrorIcon.enabled {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}

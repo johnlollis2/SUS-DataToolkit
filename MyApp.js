@@ -54,7 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
             encoding: {
                 x: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
                 y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
-            }
+            },
+            width: 'container',  // Ensure the chart scales to the container
+            height: 'container'
         };
 
         vegaEmbed('#barChart', barChartSpec).catch(console.error);
@@ -84,7 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
             encoding: {
                 theta: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
                 radius: { field: 'score', type: 'quantitative', axis: { title: 'Average Score' } }
-            }
+            },
+            width: 'container',  // Ensure the chart scales to the container
+            height: 'container'
         };
 
         vegaEmbed('#radarChart', radarChartSpec).catch(console.error);

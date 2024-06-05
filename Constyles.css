@@ -5,12 +5,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #f5dddd;
+    background-color: #E3FEF7;
 }
 
 #header {
     width: 100%;
-    background-color: #522323;
+    background-color: #003c43;
     color: white;
     text-align: center;
     padding: 20px 0;

@@ -154,18 +154,4 @@ document.addEventListener('DOMContentLoaded', () => {
     function average(arr) {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
-
-    // Tab functionality
-    const tabs = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(tc => tc.classList.remove('active'));
-
-            tab.classList.add('active');
-            document.getElementById(tab.getAttribute('onclick').split('\'')[1]).classList.add('active');
-        });
-    });
 });

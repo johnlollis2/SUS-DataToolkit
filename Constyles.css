@@ -55,7 +55,7 @@ body {
     margin-top: 20px;
 }
 
-#barChart, #radarChart {
+#barChart, #radarChart, #scoreDistribution {
     width: 100%;
     max-width: 600px;
     height: 400px;

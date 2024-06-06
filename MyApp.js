@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const averageScoreDiv = document.getElementById('averageScore');
     const barChartDiv = document.getElementById('barChart');
     const radarChartDiv = document.getElementById('radarChart');
+    const scoreDistributionDiv = document.getElementById('scoreDistribution');
     const interpretationPanel = document.getElementById('interpretationPanel');
     const dataTable = document.getElementById('dataTable');
     const downloadButton = document.getElementById('downloadButton');
@@ -52,8 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const scores = calculateSUSScores(susData);
                     const averageScore = calculateAverageScore(scores);
-                    renderBarChart(scores);
+                    renderBarChart(susData);
                     renderRadarChart(susData);
+                    renderScoreDistribution(scores);
                     renderTable(susData, scores);
                     displayAverageScore(averageScore);
                     displayInterpretation(averageScore);
@@ -76,17 +78,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return scores.reduce((a, b) => a + b, 0) / scores.length;
     }
 
-    function renderBarChart(scores) {
+    function renderBarChart(data) {
         const barChartSpec = {
             $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A bar chart of SUS scores.',
+            description: 'A bar chart of individual SUS scores.',
             data: {
-                values: scores.map((score, index) => ({ user: `User ${index + 1}`, score }))
+                values: data.flatMap((row, index) => Object.keys(row).map(question => ({
+                    user: `User ${index + 1}`,
+                    question,
+                    score: row[question]
+                })))
             },
             mark: 'bar',
             encoding: {
-                x: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
-                y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
+                x: { field: 'question', type: 'ordinal', axis: { title: 'Question' } },
+                y: { field: 'score', type: 'quantitative', axis: { title: 'Score' } },
+                color: { field: 'user', type: 'nominal' }
             },
             width: 600,
             height: 400
@@ -127,6 +134,25 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
+    }
+
+    function renderScoreDistribution(scores) {
+        const scoreDistributionSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+            description: 'A histogram of SUS score distribution.',
+            data: {
+                values: scores.map(score => ({ score }))
+            },
+            mark: 'bar',
+            encoding: {
+                x: { field: 'score', bin: true, axis: { title: 'SUS Score' } },
+                y: { aggregate: 'count', axis: { title: 'Count' } }
+            },
+            width: 600,
+            height: 400
+        };
+
+        vegaEmbed('#scoreDistribution', scoreDistributionSpec).catch(console.error);
     }
 
     function renderTable(data, scores) {
@@ -195,7 +221,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayInterpretation(averageScore) {
-        interpretationPanel.innerHTML = `<p>The average SUS score is ${averageScore.toFixed(2)}. A score above 68 is considered above average, while a score below 68 is considered below average.</p>`;
+        interpretationPanel.innerHTML = `
+            <p>The average SUS score is ${averageScore.toFixed(2)}.</p>
+            <p>A score above 68 is considered above average, while a score below 68 is considered below average.</p>
+            <p>Score Ranges:
+                <ul>
+                    <li>0-25: Poor</li>
+                    <li>26-50: OK</li>
+                    <li>51-75: Good</li>
+                    <li>76-100: Excellent</li>
+                </ul>
+            </p>
+            <p>Percentiles:
+                <ul>
+                    <li>Top 10%: Excellent</li>
+                    <li>Top 30%: Good</li>
+                    <li>Bottom 30%: OK</li>
+                    <li>Bottom 10%: Poor</li>
+                </ul>
+            </p>
+        `;
     }
 
     function average(arr) {

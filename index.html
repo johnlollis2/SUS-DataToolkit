@@ -4,30 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Automated SUS Datatoolkit</title>
-    <link rel="stylesheet" href="Constyles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    <script defer src="MyApp.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .chart, .interpretation, .table-container {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            width: 45%;
+        }
+        .chart-full {
+            width: 90%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>AUTOMATED SUS DATATOOLKIT</h1>
-    </header>
-    <main>
-        <div class="container">
-            <input type="file" id="fileInput" />
-            <button id="processFile">Process File</button>
-            <div id="charts" class="tab-content">
+    <div class="container">
+        <h1>Automated SUS Datatoolkit</h1>
+        <input type="file" id="fileInput">
+        <button id="processFile">Process File</button>
+        <button id="downloadButton">Download Data</button>
+        <div id="main-content">
+            <div class="charts-container">
                 <div id="radarChart" class="chart"></div>
                 <div id="barChart" class="chart"></div>
-                <div id="interpretationPanel" class="interpretation"></div>
             </div>
-            <div id="table" class="tab-content">
+            <div class="table-container">
                 <table id="dataTable"></table>
             </div>
-            <button id="downloadButton">Download Data</button>
+            <div id="interpretationPanel" class="interpretation"></div>
         </div>
-    </main>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

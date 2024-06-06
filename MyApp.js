@@ -2,136 +2,116 @@ document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('fileInput');
     const processFileButton = document.getElementById('processFile');
     const downloadButton = document.getElementById('downloadButton');
-    const radarChart = document.getElementById('radarChart');
-    const barChart = document.getElementById('barChart');
+    const radarChartContainer = document.getElementById('radarChart');
+    const barChartContainer = document.getElementById('barChart');
     const interpretationPanel = document.getElementById('interpretationPanel');
     const dataTable = document.getElementById('dataTable');
-
+    
+    let data = [];
+    let scores = [];
+    let averageScores = {};
+    
     processFileButton.addEventListener('click', function () {
-        const file = fileInput.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = parseCSV(e.target.result);
-                const scores = calculateScores(data);
-                renderRadarChart(data);
-                renderBarChart(scores);
-                displayInterpretation(average(scores));
-                renderTable(data, scores);
-            };
-            reader.readAsText(file);
+        if (fileInput.files.length === 0) {
+            alert('Please select a file!');
+            return;
         }
-    });
 
-    function parseCSV(data) {
-        const rows = data.split('\n');
-        const headers = rows[0].split(',');
-        const result = rows.slice(1).map(row => {
-            const values = row.split(',');
-            const obj = {};
-            headers.forEach((header, index) => {
-                obj[header.trim()] = parseFloat(values[index].trim());
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const csvData = event.target.result;
+            const rows = csvData.split('\n').map(row => row.split(','));
+            const headers = rows[0];
+            data = rows.slice(1).map(row => {
+                return headers.reduce((obj, header, index) => {
+                    obj[header] = parseFloat(row[index]);
+                    return obj;
+                }, {});
             });
-            return obj;
+            processData(data);
+            updateTable(data);
+            renderCharts();
+        };
+        reader.readAsText(file);
+    });
+    
+    function processData(data) {
+        scores = data.map(item => calculateSUSScore(item));
+        averageScores = calculateAverageScores(data);
+    }
+    
+    function calculateSUSScore(item) {
+        return ((item.Q1 + item.Q2 + item.Q3 + item.Q4 + item.Q5 + item.Q6 + item.Q7 + item.Q8 + item.Q9 + item.Q10) / 10) * 2.5;
+    }
+    
+    function calculateAverageScores(data) {
+        const totals = data.reduce((totals, item) => {
+            Object.keys(item).forEach(key => {
+                totals[key] = (totals[key] || 0) + item[key];
+            });
+            return totals;
+        }, {});
+        const averages = {};
+        Object.keys(totals).forEach(key => {
+            averages[key] = totals[key] / data.length;
         });
-        return result;
+        return averages;
     }
 
-    function calculateScores(data) {
-        return data.map(row => {
-            return (row.Q1 + row.Q2 + row.Q3 + row.Q4 + row.Q5 + row.Q6 + row.Q7 + row.Q8 + row.Q9 + row.Q10) / 10;
-        });
+    function renderCharts() {
+        renderRadarChart();
+        renderBarChart();
+        updateInterpretationPanel();
     }
 
-    function renderRadarChart(data) {
-        const averageScores = {
-            Q1: average(data.map(item => item.Q1)),
-            Q2: average(data.map(item => item.Q2)),
-            Q3: average(data.map(item => item.Q3)),
-            Q4: average(data.map(item => item.Q4)),
-            Q5: average(data.map(item => item.Q5)),
-            Q6: average(data.map(item => item.Q6)),
-            Q7: average(data.map(item => item.Q7)),
-            Q8: average(data.map(item => item.Q8)),
-            Q9: average(data.map(item => item.Q9)),
-            Q10: average(data.map(item => item.Q10))
-        };
-
-        const radarData = {
-            values: Object.values(averageScores),
-            labels: Object.keys(averageScores),
-            type: 'radar'
-        };
-
+    function renderRadarChart() {
         const radarSpec = {
-            data: { values: [radarData] },
-            mark: 'line',
-            encoding: {
-                theta: { field: 'labels', type: 'nominal' },
-                radius: { field: 'values', type: 'quantitative' }
+            "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+            "data": {
+                "values": [
+                    {"question": "Q1", "score": averageScores.Q1},
+                    {"question": "Q2", "score": averageScores.Q2},
+                    {"question": "Q3", "score": averageScores.Q3},
+                    {"question": "Q4", "score": averageScores.Q4},
+                    {"question": "Q5", "score": averageScores.Q5},
+                    {"question": "Q6", "score": averageScores.Q6},
+                    {"question": "Q7", "score": averageScores.Q7},
+                    {"question": "Q8", "score": averageScores.Q8},
+                    {"question": "Q9", "score": averageScores.Q9},
+                    {"question": "Q10", "score": averageScores.Q10}
+                ]
             },
-            width: 400,
-            height: 400
+            "mark": "line",
+            "encoding": {
+                "theta": {"field": "question", "type": "nominal"},
+                "radius": {"field": "score", "type": "quantitative"}
+            }
         };
-
-        vegaEmbed('#radarChart', radarSpec).catch(console.error);
+        vegaEmbed('#radarChart', radarSpec);
     }
 
-    function renderBarChart(scores) {
-        const scoreData = scores.map((score, index) => ({ user: `User ${index + 1}`, score }));
-
-        const barChartSpec = {
-            data: { values: scoreData },
-            mark: 'bar',
-            encoding: {
-                x: { field: 'user', type: 'nominal', axis: { title: 'User' } },
-                y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
+    function renderBarChart() {
+        const barSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+            "data": {
+                "values": scores.map((score, index) => ({ "user": `User ${index + 1}`, "score": score }))
             },
-            width: 400,
-            height: 400
+            "mark": "bar",
+            "encoding": {
+                "x": {"field": "user", "type": "nominal"},
+                "y": {"field": "score", "type": "quantitative"}
+            }
         };
-
-        vegaEmbed('#barChart', barChartSpec).catch(console.error);
+        vegaEmbed('#barChart', barSpec);
     }
-
-    function displayInterpretation(averageScore) {
-        interpretationPanel.innerHTML = `
-            <h3>SUS - Average Score: ${averageScore.toFixed(2)}</h3>
-            <p>The average SUS score is ${averageScore.toFixed(2)}.</p>
-            <p>A score above 68 is considered above average, while a score below 68 is considered below average.</p>
-            <p>Score Ranges:
-                <ul>
-                    <li>0-25: Poor</li>
-                    <li>26-50: OK</li>
-                    <li>51-75: Good</li>
-                    <li>76-100: Excellent</li>
-                </ul>
-            </p>
-            <p>Percentiles:
-                <ul>
-                    <li>Top 10%: Excellent</li>
-                    <li>Top 30%: Good</li>
-                    <li>Bottom 30%: OK</li>
-                    <li>Bottom 10%: Poor</li>
-                </ul>
-            </p>
-        `;
+    
+    function updateInterpretationPanel() {
+        const averageSUSScore = average(scores).toFixed(2);
+        interpretationPanel.innerHTML = `<h3>SUS - Average Score: ${averageSUSScore}</h3>`;
     }
-
-    function renderTable(data, scores) {
-        const averageScores = {
-            Q1: average(data.map(item => item.Q1)),
-            Q2: average(data.map(item => item.Q2)),
-            Q3: average(data.map(item => item.Q3)),
-            Q4: average(data.map(item => item.Q4)),
-            Q5: average(data.map(item => item.Q5)),
-            Q6: average(data.map(item => item.Q6)),
-            Q7: average(data.map(item => item.Q7)),
-            Q8: average(data.map(item => item.Q8)),
-            Q9: average(data.map(item => item.Q9)),
-            Q10: average(data.map(item => item.Q10))
-        };
-
+    
+    function updateTable(data) {
         dataTable.innerHTML = `
             <tr>
                 <th>User</th>
@@ -181,16 +161,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function average(arr) {
-        return arr.reduce((a, b) => a + b, 0) / arr.length;
+        return arr.reduce((sum, val) => sum + val, 0) / arr.length;
     }
-
+    
     downloadButton.addEventListener('click', function () {
-        const csvContent = `data:text/csv;charset=utf-8,${[...dataTable.rows].map(e => [...e.cells].map(e => e.innerText).join(",")).join("\n")}`;
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "SUS_data.csv");
-        document.body.appendChild(link);
-        link.click();
+        const csvContent = data.map((item, index) => 
+            `User ${index + 1},${item.Q1},${item.Q2},${item.Q3},${item.Q4},${item.Q5},${item.Q6},${item.Q7},${item.Q8},${item.Q9},${item.Q10},${scores[index].toFixed(2)}`
+        ).join('\n');
+        const averageRow = `Average,${averageScores.Q1.toFixed(2)},${averageScores.Q2.toFixed(2)},${averageScores.Q3.toFixed(2)},${averageScores.Q4.toFixed(2)},${averageScores.Q5.toFixed(2)},${averageScores.Q6.toFixed(2)},${averageScores.Q7.toFixed(2)},${averageScores.Q8.toFixed(2)},${averageScores.Q9.toFixed(2)},${averageScores.Q10.toFixed(2)},${average(scores).toFixed(2)}`;
+        const csvHeader = 'User,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,Q10,Average Score';
+        const csvData = `${csvHeader}\n${csvContent}\n${averageRow}`;
+        const blob = new Blob([csvData], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'SUS_Scores.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     });
 });

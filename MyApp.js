@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropArea = document.getElementById('drop-area');
     const processButton = document.getElementById('processButton');
     const averageScoreDiv = document.getElementById('averageScore');
-    const barChartDiv = document.getElementById('barChart');
-    const radarChartDiv = document.getElementById('radarChart');
-    const scoreDistributionDiv = document.getElementById('scoreDistribution');
+    const barChartContent = document.getElementById('barChartContent');
+    const radarChartContent = document.getElementById('radarChartContent');
+    const scoreDistributionContent = document.getElementById('scoreDistributionContent');
     const interpretationPanel = document.getElementById('interpretationPanel');
     const dataTable = document.getElementById('dataTable');
     const downloadButton = document.getElementById('downloadButton');
@@ -57,8 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderRadarChart(susData);
                     renderScoreDistribution(scores);
                     renderTable(susData, scores);
-                    displayAverageScore(averageScore);
-                    displayInterpretation(averageScore);
+                    displayInterpretation(averageScore, susData);
                 }
             });
         } else {
@@ -99,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             height: 400
         };
 
-        vegaEmbed('#barChart', barChartSpec).catch(console.error);
+        vegaEmbed('#barChartContent', barChartSpec).catch(console.error);
     }
 
     function renderRadarChart(data) {
@@ -133,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
             height: 400
         };
 
-        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
+        vegaEmbed('#radarChartContent', radarChartSpec).catch(console.error);
     }
 
     function renderScoreDistribution(scores) {
@@ -152,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
             height: 400
         };
 
-        vegaEmbed('#scoreDistribution', scoreDistributionSpec).catch(console.error);
+        vegaEmbed('#scoreDistributionContent', scoreDistributionSpec).catch(console.error);
     }
 
     function renderTable(data, scores) {
@@ -216,13 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function displayAverageScore(averageScore) {
-        averageScoreDiv.innerHTML = `<h2>SUS - Average Score: ${averageScore.toFixed(2)}</h2>`;
-    }
-
-    function displayInterpretation(averageScore) {
+    function displayInterpretation(averageScore, data) {
+        const totalAverage = averageScore.toFixed(2);
         interpretationPanel.innerHTML = `
-            <p>The average SUS score is ${averageScore.toFixed(2)}.</p>
+            <p>SUS - Average Score: ${totalAverage}</p>
+            <p>The average SUS score is ${totalAverage}.</p>
             <p>A score above 68 is considered above average, while a score below 68 is considered below average.</p>
             <p>Score Ranges:
                 <ul>

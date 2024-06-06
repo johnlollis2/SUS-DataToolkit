@@ -3,36 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AUTOMATED SUS DATATOOLKIT</title>
+    <title>Automated SUS Datatoolkit</title>
     <link rel="stylesheet" href="Constyles.css">
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <script defer src="MyApp.js"></script>
 </head>
 <body>
-    <div id="header">
+    <header>
         <h1>AUTOMATED SUS DATATOOLKIT</h1>
-    </div>
-    <div id="app">
-        <div class="tabs">
-            <button class="tab-button active" onclick="openTab('chartContainer')">Charts</button>
-            <button class="tab-button" onclick="openTab('tableContainer')">Table</button>
-        </div>
-        <div id="chartContainer" class="tab-content active">
-            <div class="chart-row">
+    </header>
+    <main>
+        <div class="container">
+            <input type="file" id="fileInput" />
+            <button id="processFile">Process File</button>
+            <div id="charts" class="tab-content">
                 <div id="radarChart" class="chart"></div>
                 <div id="barChart" class="chart"></div>
+                <div id="interpretationPanel" class="interpretation"></div>
             </div>
-            <div class="chart-row">
-                <div id="interpretationPanel" class="panel"></div>
+            <div id="table" class="tab-content">
+                <table id="dataTable"></table>
             </div>
             <button id="downloadButton">Download Data</button>
         </div>
-        <div id="tableContainer" class="tab-content">
-            <table id="dataTable"></table>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
-    <script src="MyApp.js"></script>
+    </main>
 </body>
 </html>

@@ -1,54 +1,46 @@
 document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('fileInput');
-    const processButton = document.getElementById('processButton');
+    const processFileButton = document.getElementById('processFile');
+    const downloadButton = document.getElementById('downloadButton');
     const radarChart = document.getElementById('radarChart');
     const barChart = document.getElementById('barChart');
     const interpretationPanel = document.getElementById('interpretationPanel');
     const dataTable = document.getElementById('dataTable');
-    const downloadButton = document.getElementById('downloadButton');
 
-    processButton.addEventListener('click', () => {
+    processFileButton.addEventListener('click', function () {
         const file = fileInput.files[0];
         if (file) {
-            Papa.parse(file, {
-                header: true,
-                complete: function (results) {
-                    const susData = results.data.map(row => ({
-                        Q1: parseInt(row.Q1),
-                        Q2: parseInt(row.Q2),
-                        Q3: parseInt(row.Q3),
-                        Q4: parseInt(row.Q4),
-                        Q5: parseInt(row.Q5),
-                        Q6: parseInt(row.Q6),
-                        Q7: parseInt(row.Q7),
-                        Q8: parseInt(row.Q8),
-                        Q9: parseInt(row.Q9),
-                        Q10: parseInt(row.Q10)
-                    }));
-
-                    const scores = calculateSUSScores(susData);
-                    const averageScore = calculateAverageScore(scores);
-                    renderRadarChart(susData);
-                    renderBarChart(scores);
-                    displayInterpretation(averageScore);
-                    renderTable(susData, scores);
-                }
-            });
-        } else {
-            alert('Please select a file to process.');
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = parseCSV(e.target.result);
+                const scores = calculateScores(data);
+                renderRadarChart(data);
+                renderBarChart(scores);
+                displayInterpretation(average(scores));
+                renderTable(data, scores);
+            };
+            reader.readAsText(file);
         }
     });
 
-    function calculateSUSScores(data) {
-        return data.map(item => {
-            const positiveScores = (item.Q1 - 1) + (item.Q3 - 1) + (item.Q5 - 1) + (item.Q7 - 1) + (item.Q9 - 1);
-            const negativeScores = (5 - item.Q2) + (5 - item.Q4) + (5 - item.Q6) + (5 - item.Q8) + (5 - item.Q10);
-            return (positiveScores + negativeScores) * 2.5;
+    function parseCSV(data) {
+        const rows = data.split('\n');
+        const headers = rows[0].split(',');
+        const result = rows.slice(1).map(row => {
+            const values = row.split(',');
+            const obj = {};
+            headers.forEach((header, index) => {
+                obj[header.trim()] = parseFloat(values[index].trim());
+            });
+            return obj;
         });
+        return result;
     }
 
-    function calculateAverageScore(scores) {
-        return scores.reduce((a, b) => a + b, 0) / scores.length;
+    function calculateScores(data) {
+        return data.map(row => {
+            return (row.Q1 + row.Q2 + row.Q3 + row.Q4 + row.Q5 + row.Q6 + row.Q7 + row.Q8 + row.Q9 + row.Q10) / 10;
+        });
     }
 
     function renderRadarChart(data) {
@@ -65,35 +57,31 @@ document.addEventListener('DOMContentLoaded', function () {
             Q10: average(data.map(item => item.Q10))
         };
 
-        const radarData = Object.keys(averageScores).map(key => ({ question: key, score: averageScores[key] }));
+        const radarData = {
+            values: Object.values(averageScores),
+            labels: Object.keys(averageScores),
+            type: 'radar'
+        };
 
-        const radarChartSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A radar chart of average SUS question scores.',
-            data: {
-                values: radarData
-            },
+        const radarSpec = {
+            data: { values: [radarData] },
             mark: 'line',
             encoding: {
-                theta: { field: 'question', type: 'nominal' },
-                radius: { field: 'score', type: 'quantitative' }
+                theta: { field: 'labels', type: 'nominal' },
+                radius: { field: 'values', type: 'quantitative' }
             },
             width: 400,
             height: 400
         };
 
-        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
+        vegaEmbed('#radarChart', radarSpec).catch(console.error);
     }
 
     function renderBarChart(scores) {
         const scoreData = scores.map((score, index) => ({ user: `User ${index + 1}`, score }));
 
         const barChartSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A bar chart of individual SUS scores.',
-            data: {
-                values: scoreData
-            },
+            data: { values: scoreData },
             mark: 'bar',
             encoding: {
                 x: { field: 'user', type: 'nominal', axis: { title: 'User' } },
@@ -157,25 +145,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 <th>Q8</th>
                 <th>Q9</th>
                 <th>Q10</th>
-                <th>SUS Score</th>
+                <th>Average Score</th>
             </tr>
-            ${data.map((row, index) => `
+            ${data.map((item, index) => `
                 <tr>
                     <td>User ${index + 1}</td>
-                    <td>${row.Q1}</td>
-                    <td>${row.Q2}</td>
-                    <td>${row.Q3}</td>
-                    <td>${row.Q4}</td>
-                    <td>${row.Q5}</td>
-                    <td>${row.Q6}</td>
-                    <td>${row.Q7}</td>
-                    <td>${row.Q8}</td>
-                    <td>${row.Q9}</td>
-                    <td>${row.Q10}</td>
+                    <td>${item.Q1}</td>
+                    <td>${item.Q2}</td>
+                    <td>${item.Q3}</td>
+                    <td>${item.Q4}</td>
+                    <td>${item.Q5}</td>
+                    <td>${item.Q6}</td>
+                    <td>${item.Q7}</td>
+                    <td>${item.Q8}</td>
+                    <td>${item.Q9}</td>
+                    <td>${item.Q10}</td>
                     <td>${scores[index]}</td>
-                </tr>`).join('')}
+                </tr>
+            `).join('')}
             <tr>
-                <td><strong>Average</strong></td>
+                <td>Average</td>
                 <td>${averageScores.Q1.toFixed(2)}</td>
                 <td>${averageScores.Q2.toFixed(2)}</td>
                 <td>${averageScores.Q3.toFixed(2)}</td>
@@ -195,15 +184,13 @@ document.addEventListener('DOMContentLoaded', function () {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
 
-    downloadButton.addEventListener('click', () => {
-        const csvContent = "data:text/csv;charset=utf-8," + 
-            Array.from(dataTable.rows).map(row => Array.from(row.cells).map(cell => cell.innerText).join(",")).join("\n");
+    downloadButton.addEventListener('click', function () {
+        const csvContent = `data:text/csv;charset=utf-8,${[...dataTable.rows].map(e => [...e.cells].map(e => e.innerText).join(",")).join("\n")}`;
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "SUS_Data.csv");
+        link.setAttribute("download", "SUS_data.csv");
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
     });
 });

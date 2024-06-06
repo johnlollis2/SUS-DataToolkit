@@ -2,10 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     const dropArea = document.getElementById('drop-area');
     const processButton = document.getElementById('processButton');
+    const averageScoreDiv = document.getElementById('averageScore');
     const barChartDiv = document.getElementById('barChart');
     const radarChartDiv = document.getElementById('radarChart');
     const dataTable = document.getElementById('dataTable');
-    const boxPlotDiv = document.getElementById('boxPlot');
     const downloadButton = document.getElementById('downloadButton');
 
     dropArea.addEventListener('click', () => {
@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 x: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
                 y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
             },
-            width: 'container',  // Ensure the chart scales to the container
-            height: 'container'
+            width: 800,
+            height: 400
         };
 
         vegaEmbed('#barChart', barChartSpec).catch(console.error);
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayAverageScore(averageScore) {
-        boxPlotDiv.innerHTML = `<h2>SUS - Average Score: ${averageScore.toFixed(2)}</h2>`;
+        averageScoreDiv.innerHTML = `<h2>SUS - Average Score: ${averageScore.toFixed(2)}</h2>`;
     }
 
     function average(arr) {

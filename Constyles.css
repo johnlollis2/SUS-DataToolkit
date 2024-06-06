@@ -55,11 +55,16 @@ body {
     margin-top: 20px;
 }
 
-#barChart, #radarChart, #scoreDistribution {
+#chartContainer > div {
     width: 100%;
     max-width: 600px;
     height: 400px;
     margin-bottom: 20px;
+}
+
+#chartContainer h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
 }
 
 #interpretationPanel {
@@ -70,6 +75,16 @@ body {
     padding: 10px;
     border: 1px solid #ddd;
     margin-top: 20px;
+}
+
+#tableContainer {
+    width: 100%;
+    margin-top: 20px;
+}
+
+#tableContainer h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
 }
 
 table {

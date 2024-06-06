@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     const dropArea = document.getElementById('drop-area');
     const processButton = document.getElementById('processButton');
-    const averageScoreDiv = document.getElementById('averageScore');
     const barChartContent = document.getElementById('barChartContent');
     const radarChartContent = document.getElementById('radarChartContent');
     const scoreDistributionContent = document.getElementById('scoreDistributionContent');
@@ -250,8 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "sus_scores.csv");
-        document.body.appendChild(link);
-        link.click();
+        setTimeout(() => {
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }, 0);
     });
 });

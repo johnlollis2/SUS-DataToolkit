@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropArea = document.getElementById('drop-area');
     const processButton = document.getElementById('processButton');
     const averageScoreDiv = document.getElementById('averageScore');
-    const barChartDiv = document.getElementById('barChart');
-    const radarChartDiv = document.getElementById('radarChart');
+    const barChartCanvas = document.getElementById('barChart').getContext('2d');
+    const radarChartCanvas = document.getElementById('radarChart').getContext('2d');
     const dataTable = document.getElementById('dataTable');
     const downloadButton = document.getElementById('downloadButton');
 
@@ -75,22 +75,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBarChart(scores) {
-        const barChartSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A bar chart of SUS scores.',
+        new Chart(barChartCanvas, {
+            type: 'bar',
             data: {
-                values: scores.map((score, index) => ({ user: `User ${index + 1}`, score }))
+                labels: scores.map((_, index) => `User ${index + 1}`),
+                datasets: [{
+                    label: 'SUS Score',
+                    data: scores,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
             },
-            mark: 'bar',
-            encoding: {
-                x: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
-                y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
-            },
-            width: 800,
-            height: 400
-        };
-
-        vegaEmbed('#barChart', barChartSpec).catch(console.error);
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'SUS Score'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'User'
+                        }
+                    }
+                }
+            }
+        });
     }
 
     function renderRadarChart(data) {
@@ -107,22 +121,32 @@ document.addEventListener('DOMContentLoaded', () => {
             Q10: average(data.map(item => item.Q10))
         };
 
-        const radarChartSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A radar chart of average SUS question scores.',
+        new Chart(radarChartCanvas, {
+            type: 'radar',
             data: {
-                values: Object.keys(averageScores).map(key => ({ question: key, score: averageScores[key] }))
+                labels: Object.keys(averageScores),
+                datasets: [{
+                    label: 'Average Scores',
+                    data: Object.values(averageScores),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
             },
-            mark: { type: 'line', point: true },
-            encoding: {
-                theta: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
-                radius: { field: 'score', type: 'quantitative', axis: { title: 'Average Score' } }
-            },
-            width: 400,
-            height: 400
-        };
-
-        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
+            options: {
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        pointLabels: {
+                            display: true,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     function renderTable(data, scores) {

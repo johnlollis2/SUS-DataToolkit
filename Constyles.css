@@ -23,17 +23,18 @@ body {
 }
 
 #app {
-    width: 90%;
-    max-width: 1200px;
+    width: 100%;
+    max-width: 100%;
     background: #fff;
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     margin-top: 20px;
+    box-sizing: border-box;
 }
 
 .tabs {
-    margin-top: 50px;
+    margin-top: 20px;
     display: flex;
     justify-content: center;
 }

@@ -3,68 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automated SUS Datatoolkit</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        .charts-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
-        .chart, .interpretation, .table-container {
-            margin: 20px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-            width: 45%;
-        }
-        .chart-full {
-            width: 90%;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-    </style>
+    <title>AUTOMATED SUS DATATOOLIKT</title>
+    <link rel="stylesheet" href="Constyles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Automated SUS Datatoolkit</h1>
-        <input type="file" id="fileInput">
-        <button id="processFile">Process File</button>
-        <button id="downloadButton">Download Data</button>
-        <div id="main-content">
-            <div class="charts-container">
-                <div id="radarChart" class="chart"></div>
-                <div id="barChart" class="chart"></div>
+    <div id="header">
+        <h1>AUTOMATED SUS DATATOOLIKT</h1>
+    </div>
+    <div id="app">
+        <div id="dropArea">
+            <input type="file" id="fileInput" accept=".csv" hidden />
+            <button id="processButton">Select File</button>
+        </div>
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('chartContainer')">Charts</button>
+            <button class="tab-button" onclick="openTab('tableContainer')">Table</button>
+        </div>
+        <div id="chartContainer" class="tab-content active">
+            <div class="chart-row">
+                <div id="radarChart" class="chart-box"></div>
+                <div id="barChart" class="chart-box"></div>
             </div>
-            <div class="table-container">
-                <table id="dataTable"></table>
+            <div class="chart-row">
+                <div id="boxPlot" class="chart-box-wide"></div>
             </div>
-            <div id="interpretationPanel" class="interpretation"></div>
+            <div id="interpretationPanel"></div>
+            <button id="downloadButton">Download Data</button>
+        </div>
+        <div id="tableContainer" class="tab-content">
+            <table id="dataTable"></table>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+    <script src="MyApp.js"></script>
 </body>
 </html>

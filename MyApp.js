@@ -27,30 +27,25 @@ document.addEventListener('DOMContentLoaded', function () {
                         Q10: parseInt(row.Q10)
                     }));
 
-                    const scores = calculateSUSScores(susData);
-                    const averageScore = calculateAverageScore(scores);
+                    // Continue processing susData here
+                    const scores = susData.map(row => calculateSUSScore(row));
                     renderRadarChart(susData);
-                    renderBarChart(susData, scores);
+                    renderBarChart(scores);
                     renderScoreDistribution(scores);
                     renderTable(susData, scores);
-                    displayInterpretation(averageScore);
+                    displayInterpretation(average(scores));
                 }
             });
-        } else {
-            alert('Please select a file to process.');
         }
     });
 
-    function calculateSUSScores(data) {
-        return data.map(item => {
-            const positiveScores = (item.Q1 - 1) + (item.Q3 - 1) + (item.Q5 - 1) + (item.Q7 - 1) + (item.Q9 - 1);
-            const negativeScores = (5 - item.Q2) + (5 - item.Q4) + (5 - item.Q6) + (5 - item.Q8) + (5 - item.Q10);
-            return (positiveScores + negativeScores) * 2.5;
-        });
+    function calculateSUSScore(row) {
+        // Calculate SUS score based on row data
+        return (row.Q1 + row.Q2 + row.Q3 + row.Q4 + row.Q5 + row.Q6 + row.Q7 + row.Q8 + row.Q9 + row.Q10) / 10;
     }
 
-    function calculateAverageScore(scores) {
-        return scores.reduce((a, b) => a + b, 0) / scores.length;
+    function average(arr) {
+        return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
 
     function renderRadarChart(data) {
@@ -67,35 +62,38 @@ document.addEventListener('DOMContentLoaded', function () {
             Q10: average(data.map(item => item.Q10))
         };
 
-        const radarData = Object.keys(averageScores).map(key => ({ question: key, score: averageScores[key] }));
+        const radarData = Object.keys(averageScores).map(key => ({
+            question: key,
+            score: averageScores[key]
+        }));
 
         const radarChartSpec = {
             $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A radar chart of average SUS question scores.',
+            description: 'A radar chart showing average SUS scores for each question.',
             data: {
                 values: radarData
             },
-            mark: {type: 'line', point: true},
+            mark: 'line',
             encoding: {
                 theta: { field: 'question', type: 'nominal' },
                 radius: { field: 'score', type: 'quantitative' }
             },
-            width: 600,
+            width: 400,
             height: 400
         };
 
         vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
     }
 
-    function renderBarChart(data, scores) {
-        const barData = data.map((row, index) => ({
+    function renderBarChart(scores) {
+        const barData = scores.map((score, index) => ({
             user: `User ${index + 1}`,
-            score: scores[index]
+            score
         }));
 
         const barChartSpec = {
             $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A bar chart of individual SUS scores.',
+            description: 'A bar chart showing individual SUS scores.',
             data: {
                 values: barData
             },
@@ -218,19 +216,14 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
     }
 
-    function average(arr) {
-        return arr.reduce((a, b) => a + b, 0) / arr.length;
-    }
-
     downloadButton.addEventListener('click', () => {
         const csvContent = "data:text/csv;charset=utf-8," + 
             Array.from(dataTable.rows).map(row => Array.from(row.cells).map(cell => cell.innerText).join(",")).join("\n");
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "SUS_data.csv");
+        link.setAttribute("download", "sus_data.csv");
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
     });
 });

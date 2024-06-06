@@ -1,42 +1,19 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('fileInput');
-    const dropArea = document.getElementById('drop-area');
     const processButton = document.getElementById('processButton');
-    const barChartContent = document.getElementById('barChartContent');
-    const radarChartContent = document.getElementById('radarChartContent');
-    const scoreDistributionContent = document.getElementById('scoreDistributionContent');
+    const radarChart = document.getElementById('radarChart');
+    const barChart = document.getElementById('barChart');
+    const scoreDistribution = document.getElementById('scoreDistribution');
     const interpretationPanel = document.getElementById('interpretationPanel');
     const dataTable = document.getElementById('dataTable');
     const downloadButton = document.getElementById('downloadButton');
-
-    dropArea.addEventListener('click', () => {
-        fileInput.click();
-    });
-
-    dropArea.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        dropArea.classList.add('dragover');
-    });
-
-    dropArea.addEventListener('dragleave', () => {
-        dropArea.classList.remove('dragover');
-    });
-
-    dropArea.addEventListener('drop', (event) => {
-        event.preventDefault();
-        dropArea.classList.remove('dragover');
-        const files = event.dataTransfer.files;
-        if (files.length) {
-            fileInput.files = files;
-        }
-    });
 
     processButton.addEventListener('click', () => {
         const file = fileInput.files[0];
         if (file) {
             Papa.parse(file, {
                 header: true,
-                complete: function(results) {
+                complete: function (results) {
                     const susData = results.data.map(row => ({
                         Q1: parseInt(row.Q1),
                         Q2: parseInt(row.Q2),
@@ -52,11 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const scores = calculateSUSScores(susData);
                     const averageScore = calculateAverageScore(scores);
-                    renderBarChart(susData);
                     renderRadarChart(susData);
+                    renderBarChart(susData, scores);
                     renderScoreDistribution(scores);
                     renderTable(susData, scores);
-                    displayInterpretation(averageScore, susData);
+                    displayInterpretation(averageScore);
                 }
             });
         } else {
@@ -74,30 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateAverageScore(scores) {
         return scores.reduce((a, b) => a + b, 0) / scores.length;
-    }
-
-    function renderBarChart(data) {
-        const barChartSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A bar chart of individual SUS scores.',
-            data: {
-                values: data.flatMap((row, index) => Object.keys(row).map(question => ({
-                    user: `User ${index + 1}`,
-                    question,
-                    score: row[question]
-                })))
-            },
-            mark: 'bar',
-            encoding: {
-                x: { field: 'question', type: 'ordinal', axis: { title: 'Question' } },
-                y: { field: 'score', type: 'quantitative', axis: { title: 'Score' } },
-                color: { field: 'user', type: 'nominal' }
-            },
-            width: 600,
-            height: 400
-        };
-
-        vegaEmbed('#barChartContent', barChartSpec).catch(console.error);
     }
 
     function renderRadarChart(data) {
@@ -122,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 values: radarData
             },
-            mark: 'line',
+            mark: {type: 'line', point: true},
             encoding: {
                 theta: { field: 'question', type: 'nominal' },
                 radius: { field: 'score', type: 'quantitative' }
@@ -131,26 +84,52 @@ document.addEventListener('DOMContentLoaded', () => {
             height: 400
         };
 
-        vegaEmbed('#radarChartContent', radarChartSpec).catch(console.error);
+        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
     }
 
-    function renderScoreDistribution(scores) {
-        const scoreDistributionSpec = {
+    function renderBarChart(data, scores) {
+        const barData = data.map((row, index) => ({
+            user: `User ${index + 1}`,
+            score: scores[index]
+        }));
+
+        const barChartSpec = {
             $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A histogram of SUS score distribution.',
+            description: 'A bar chart of individual SUS scores.',
             data: {
-                values: scores.map(score => ({ score }))
+                values: barData
             },
             mark: 'bar',
             encoding: {
-                x: { field: 'score', bin: true, axis: { title: 'SUS Score' } },
-                y: { aggregate: 'count', axis: { title: 'Count' } }
+                x: { field: 'user', type: 'nominal' },
+                y: { field: 'score', type: 'quantitative' }
             },
             width: 600,
             height: 400
         };
 
-        vegaEmbed('#scoreDistributionContent', scoreDistributionSpec).catch(console.error);
+        vegaEmbed('#barChart', barChartSpec).catch(console.error);
+    }
+
+    function renderScoreDistribution(scores) {
+        const distributionData = scores.map(score => ({ score }));
+
+        const scoreDistributionSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+            description: 'A histogram of SUS score distribution.',
+            data: {
+                values: distributionData
+            },
+            mark: 'bar',
+            encoding: {
+                x: { bin: true, field: 'score', type: 'quantitative' },
+                y: { aggregate: 'count', type: 'quantitative' }
+            },
+            width: 600,
+            height: 400
+        };
+
+        vegaEmbed('#scoreDistribution', scoreDistributionSpec).catch(console.error);
     }
 
     function renderTable(data, scores) {
@@ -214,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function displayInterpretation(averageScore, data) {
+    function displayInterpretation(averageScore) {
         const totalAverage = averageScore.toFixed(2);
         interpretationPanel.innerHTML = `
             <p>SUS - Average Score: ${totalAverage}</p>
@@ -249,10 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        setTimeout(() => {
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }, 0);
+        link.setAttribute("download", "SUS_data.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     });
 });

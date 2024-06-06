@@ -3,39 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AUTOMATED SUS DATATOOLKIT</title>
+    <title>AUTOMATED SUS DATATOOLIKT</title>
     <link rel="stylesheet" href="Constyles.css">
 </head>
 <body>
     <div id="header">
-        <h1>AUTOMATED SUS DATATOOLKIT</h1>
+        <h1>AUTOMATED SUS DATATOOLIKT</h1>
     </div>
     <div id="app">
-        <div id="drop-area">
-            <p>Drag and Drop or click here to select File</p>
-            <input type="file" id="fileInput" accept=".csv"/>
-        </div>
+        <input type="file" id="fileInput" accept=".csv" />
         <button id="processButton">Process File</button>
-        <div id="chartContainer">
-            <div id="radarChart">
-                <h2>Radar Chart: Average Score of Each Question</h2>
-                <div id="radarChartContent"></div>
-            </div>
-            <div id="barChart">
-                <h2>Bar Chart: Individual Scores</h2>
-                <div id="barChartContent"></div>
-            </div>
-            <div id="scoreDistribution">
-                <h2>Score Distribution</h2>
-                <div id="scoreDistributionContent"></div>
-            </div>
-        </div>
-        <div id="interpretationPanel">
+        <div id="chartContainer" class="tab-content active">
+            <h2>Radar Chart: Average Score of Each Question</h2>
+            <div id="radarChart"></div>
+            <h2>Bar Chart: Individual Scores</h2>
+            <div id="barChart"></div>
+            <h2>Score Distribution</h2>
+            <div id="scoreDistribution"></div>
             <h2>Interpretation Panel</h2>
+            <div id="interpretationPanel"></div>
+            <button id="downloadButton">Download Data</button>
         </div>
-        <button id="downloadButton">Download Data</button>
-        <div id="tableContainer">
-            <h2>Question Scores Table</h2>
+        <div id="tableContainer" class="tab-content">
             <table id="dataTable"></table>
         </div>
     </div>

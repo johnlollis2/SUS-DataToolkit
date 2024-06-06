@@ -1,37 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AUTOMATED SUS DATATOOLIKT</title>
-    <link rel="stylesheet" href="Constyles.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.17.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.17.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.15.1"></script>
 </head>
 <body>
-    <div id="header">
-        <h1>AUTOMATED SUS DATATOOLIKT</h1>
-    </div>
     <div id="app">
-        <input type="file" id="fileInput" accept=".csv" />
+        <h1>AUTOMATED SUS DATATOOLIKT</h1>
+        <input type="file" id="fileInput">
         <button id="processButton">Process File</button>
-        <div id="chartContainer" class="tab-content active">
-            <h2>Radar Chart: Average Score of Each Question</h2>
-            <div id="radarChart"></div>
-            <h2>Bar Chart: Individual Scores</h2>
-            <div id="barChart"></div>
-            <h2>Score Distribution</h2>
-            <div id="scoreDistribution"></div>
-            <h2>Interpretation Panel</h2>
-            <div id="interpretationPanel"></div>
-            <button id="downloadButton">Download Data</button>
+        <div id="charts">
+            <button id="chartsTab">Charts</button>
+            <button id="tableTab">Table</button>
+            <div id="chartSection">
+                <div id="radarChart">Radar Chart Placeholder</div>
+                <div id="barChart">Bar Chart Placeholder</div>
+            </div>
+            <div id="tableSection" style="display: none;">
+                <div id="dataTable">Data Table Placeholder</div>
+            </div>
         </div>
-        <div id="tableContainer" class="tab-content">
-            <table id="dataTable"></table>
-        </div>
+        <div id="scoreDistribution">Score Distribution Placeholder</div>
+        <div id="interpretationPanel">Interpretation Panel Placeholder</div>
+        <button id="downloadButton">Download Data</button>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
-    <script src="MyApp.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

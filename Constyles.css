@@ -32,6 +32,17 @@ body {
     margin-top: 20px;
     box-sizing: border-box;
 }
+#drop-area {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+#drop-area p {
+    margin: 0;
+    font-size: 1.2em;
+    font-family: 'Courier New', Courier, monospace;
 
 .tabs {
     margin-top: 20px;

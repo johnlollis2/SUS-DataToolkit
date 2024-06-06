@@ -11,7 +11,10 @@
         <h1>AUTOMATED SUS - DATATOOLKIT</h1>
     </div>
     <div id="app">
-        <input type="file" id="fileInput" accept=".csv" />
+        <div id="drop-area">
+            <p>Drag and Drop / click here to select the File</p>
+            <input type="file" id="fileInput" accept=".csv" hidden/>
+        </div>
         <button id="processButton">Process File</button>
         <div class="tabs">
             <button class="tab-button active" onclick="openTab('chartContainer')">Charts</button>
@@ -35,5 +38,10 @@
             </table>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+    <script src="MyApp.js"></script>
 </body>
 </html>

@@ -23,8 +23,8 @@ body {
 }
 
 #app {
-    width: 80%;
-    max-width: 800px;
+    width: 50%;
+    max-width: 1000px;
     background: #fff;
     padding: 20px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);

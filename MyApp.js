@@ -3,8 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropArea = document.getElementById('drop-area');
     const processButton = document.getElementById('processButton');
     const averageScoreDiv = document.getElementById('averageScore');
-    const barChartCanvas = document.getElementById('barChart').getContext('2d');
-    const radarChartCanvas = document.getElementById('radarChart').getContext('2d');
+    const barChartDiv = document.getElementById('barChart');
+    const radarChartDiv = document.getElementById('radarChart');
+    const interpretationPanel = document.getElementById('interpretationPanel');
     const dataTable = document.getElementById('dataTable');
     const downloadButton = document.getElementById('downloadButton');
 
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderRadarChart(susData);
                     renderTable(susData, scores);
                     displayAverageScore(averageScore);
+                    displayInterpretation(averageScore);
                 }
             });
         } else {
@@ -75,36 +77,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBarChart(scores) {
-        new Chart(barChartCanvas, {
-            type: 'bar',
+        const barChartSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+            description: 'A bar chart of SUS scores.',
             data: {
-                labels: scores.map((_, index) => `User ${index + 1}`),
-                datasets: [{
-                    label: 'SUS Score',
-                    data: scores,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
+                values: scores.map((score, index) => ({ user: `User ${index + 1}`, score }))
             },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'SUS Score'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'User'
-                        }
-                    }
-                }
-            }
-        });
+            mark: 'bar',
+            encoding: {
+                x: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
+                y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
+            },
+            width: 600,
+            height: 400
+        };
+
+        vegaEmbed('#barChart', barChartSpec).catch(console.error);
     }
 
     function renderRadarChart(data) {
@@ -121,32 +109,24 @@ document.addEventListener('DOMContentLoaded', () => {
             Q10: average(data.map(item => item.Q10))
         };
 
-        new Chart(radarChartCanvas, {
-            type: 'radar',
+        const radarData = Object.keys(averageScores).map(key => ({ question: key, score: averageScores[key] }));
+
+        const radarChartSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+            description: 'A radar chart of average SUS question scores.',
             data: {
-                labels: Object.keys(averageScores),
-                datasets: [{
-                    label: 'Average Scores',
-                    data: Object.values(averageScores),
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                }]
+                values: radarData
             },
-            options: {
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        pointLabels: {
-                            display: true,
-                            font: {
-                                size: 14
-                            }
-                        }
-                    }
-                }
-            }
-        });
+            mark: 'line',
+            encoding: {
+                theta: { field: 'question', type: 'nominal' },
+                radius: { field: 'score', type: 'quantitative' }
+            },
+            width: 600,
+            height: 400
+        };
+
+        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
     }
 
     function renderTable(data, scores) {
@@ -212,6 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayAverageScore(averageScore) {
         averageScoreDiv.innerHTML = `<h2>SUS - Average Score: ${averageScore.toFixed(2)}</h2>`;
+    }
+
+    function displayInterpretation(averageScore) {
+        interpretationPanel.innerHTML = `<p>The average SUS score is ${averageScore.toFixed(2)}. A score above 68 is considered above average, while a score below 68 is considered below average.</p>`;
     }
 
     function average(arr) {

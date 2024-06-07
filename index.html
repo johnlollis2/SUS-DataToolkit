@@ -13,8 +13,9 @@
     <div id="app">
         <div id="drop-area">
             <p>Drag and Drop or click here to select the File</p>
-            <input type="file" id="fileInput" accept=".csv"/>
+            <input type="file" id="fileInput" accept=".csv" hidden/>
         </div>
+        <div id="file-info">"></div>
         <button id="processButton" class="action-button">Process File</button>
         <div id="chartContainer">
             <div class="chart-row">
@@ -26,11 +27,13 @@
                 <div id="reservedChart2">Reserved for future chart</div>
             </div>
             <div id="interpretationPanel">Interpretation Panel</div>
-            <button id="downloadButton" class="action-button">Download Data</button>
-            <div id="downloadOptions" style="display: none;">
-                <button onclick="downloadData()">Download Data</button>
-                <button onclick="downloadRadarChart()">Download Radar Chart</button>
-                <button onclick="downloadBarChart()">Download Bar Chart</button>
+            <div id="downloadSection">
+                <button id="downloadButton" class="action-button">Dowload Data</button>
+                <div id="downloadOptions" style="display: none;">
+                    <button onclick="downloadData()">Download Data</button>
+                    <button onclick="downloadRadarChart()">Download Radar Chart</button>
+                    <button onclick="downloadBarChart()">Download Bar Chart</button>
+                </div>
             </div>
         </div>
         <div id="tableContainer">

@@ -13,24 +13,26 @@
     <div id="app">
         <div id="drop-area">
             <p>Drag and Drop or click here to select the File</p>
-            <input type="file" id="fileInput" accept=".csv"/>
+            <input type="file" id="fileInput" accept=".csv" hidden />
         </div>
         <button id="processButton" class="action-button">Process File</button>
         <div id="chartContainer">
             <div class="chart-row">
-                <div id="radarChart">Radar Chart To Here</div>
-                <div id="barChart">Bar Chart To Here</div>
+                <div id="radarChart" class="chart">Radar Chart Placeholder</div>
+                <div id="barChart" class="chart">Bar Chart Placeholder</div>
             </div>
             <div class="chart-row">
-                <div id="reservedChart1">Reserved for future chart</div>
-                <div id="reservedChart2">Reserved for future chart</div>
+                <div id="reservedChart1" class="chart">Reserved for future chart 1</div>
+                <div id="reservedChart2" class="chart">Reserved for future chart 2</div>
             </div>
-            <div id="interpretationPanel">Interpretation Panel</div>
-            <button id="downloadButton" class="action-button">Download Data</button>
-            <div id="downloadOptions" style="display: none;">
-                <button onclick="downloadData()">Download Data</button>
-                <button onclick="downloadRadarChart()">Download Radar Chart</button>
-                <button onclick="downloadBarChart()">Download Bar Chart</button>
+            <div id="interpretationPanel" class="panel">Interpretation Panel Placeholder</div>
+            <div id="downloadSection">
+                <button id="downloadButton" class="action-button">Download Data</button>
+                <div id="downloadOptions" style="display: none;">
+                    <button onclick="downloadData()">Download Data</button>
+                    <button onclick="downloadRadarChart()">Download Radar Chart</button>
+                    <button onclick="downloadBarChart()">Download Bar Chart</button>
+                </div>
             </div>
         </div>
         <div id="tableContainer">

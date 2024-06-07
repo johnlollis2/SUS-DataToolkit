@@ -149,12 +149,20 @@ canvas {
     margin-right: auto;
     display: block;
 }
-@media (max-width: 768px) {
-    .chart-row {
-        flex-direction: column;
+@media (min-width: 769px) and (max-width: 1024px) {
+    #app {
+        width: 95%;
     }
     .chart-row > div {
-        width: 100%;
-        margin-bottom: 20px;
+        width: 48%;
+    }
+}
+
+@media (min-width: 1025px) {
+    #app {
+        width: 90%;
+    }
+    .chart-row > div {
+        width: 48%;
     }
 }

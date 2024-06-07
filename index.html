@@ -13,16 +13,17 @@
     <div id="app">
         <div id="drop-area">
             <p>Drag and Drop or click here to select the File</p>
-            <input type="file" id="fileInput" accept=".csv"/>
+            <input type="file" id="fileInput" accept=".csv" hidden />
         </div>
         <button id="processButton">Process File</button>
         <div id="chartContainer">
             <div class="chart-row">
-                <div id="radarChart">Radar Chart</div>
-                <div id="individualScoreChart">Individual SUS Score Chart</div>
-                <div id="interpretationPanel">Interpretation Panel</div>
+                <div id="radarChart">Radar Chart Placeholder</div>
+                <div id="individualScoreChart">Bar Chart Placeholder</div>
+                <div id="interpretationPanel">Interpretation Panel Placeholder</div>
             </div>
             <div class="chart-row">
+                <div id="boxPlot">Box Plot Placeholder</div>
                 <div id="reservedChart1">Reserved for future chart</div>
                 <div id="reservedChart2">Reserved for future chart</div>
             </div>
@@ -48,5 +49,10 @@
             </table>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+    <script src="MyApp.js"></script>
 </body>
 </html>

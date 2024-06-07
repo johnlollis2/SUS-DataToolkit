@@ -39,6 +39,7 @@ body {
     margin-bottom: 20px;
     cursor: pointer;
     text-align: center;
+    transition: background-color 0.3s ease;
 }
 
 #drop-area p {
@@ -60,6 +61,11 @@ body {
     border: none;
     border-radius: 5px;
     font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+    background-color: #1a252f;
 }
 
 #fileName {
@@ -138,4 +144,13 @@ canvas {
     margin-left: auto;
     margin-right: auto;
     display: block;
+}
+@media (max-width: 768px) {
+    .chart-row {
+        flex-direction: column;
+    }
+    .chart-row > div {
+        width: 100%;
+        margin-bottom: 20px;
+    }
 }

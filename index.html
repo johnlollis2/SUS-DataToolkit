@@ -4,42 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AUTOMATED SUS DATATOOLKIT</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="Constyles.css">
 </head>
 <body>
-    <header>
+    <div id="header">
         <h1>AUTOMATED SUS - DATATOOLKIT</h1>
-    </header>
-    <main>
-        <section id="file-section">
-            <div id="drop-area">
-                <p>Drag and Drop or click here to select the file</p>
-                <input type="file" id="fileInput" accept=".csv" hidden />
+    </div>
+    <div id="app">
+        <div id="drop-area">
+            <p>Drag and Drop or click here to select the File</p>
+            <input type="file" id="fileInput" accept=".csv" hidden />
+        </div>
+        <button id="processButton">Process File</button>
+        <div id="chartContainer">
+            <div class="chart-row">
+                <div id="radarChart">Radar Chart Placeholder</div>
+                <div id="individualScoreChart">Bar Chart Placeholder</div>
+                <div id="interpretationPanel">Interpretation Panel Placeholder</div>
             </div>
-            <button id="processButton">Process File</button>
-        </section>
-        <section id="charts-section">
-            <div id="radarChart">Radar Chart: Average score per question</div>
-            <div id="individualScoreChart">Chart: Individual SUS score</div>
-            <div id="interpretationPanel">Interpretation Panel</div>
-            <div id="additionalVisualization1">We will think of what to visualize here</div>
-            <div id="additionalVisualization2">We will think of what to visualize here</div>
-        </section>
-        <section id="data-section">
+            <div class="chart-row">
+                <div id="boxPlot">Box Plot Placeholder</div>
+                <div id="reservedChart1">Reserved for future chart</div>
+                <div id="reservedChart2">Reserved for future chart</div>
+            </div>
             <button id="downloadButton">Download Data</button>
+        </div>
+        <div id="tableContainer">
+            <h1>Data</h1>
             <table id="dataTable">
-                <thead>
-                    <tr>
-                        <th>User</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th>
-                        <th>Q5</th><th>Q6</th><th>Q7</th><th>Q8</th><th>Q9</th><th>Q10</th><th>SUS Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Data rows will be inserted here -->
-                </tbody>
+                <tr>
+                    <th>User</th>
+                    <th>Q1</th>
+                    <th>Q2</th>
+                    <th>Q3</th>
+                    <th>Q4</th>
+                    <th>Q5</th>
+                    <th>Q6</th>
+                    <th>Q7</th>
+                    <th>Q8</th>
+                    <th>Q9</th>
+                    <th>Q10</th>
+                    <th>SUS Score</th>
+                </tr>
             </table>
-        </section>
-    </main>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>

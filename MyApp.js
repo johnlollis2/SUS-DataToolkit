@@ -1,14 +1,10 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
-    const dropArea = document.getElementById('dropArea');
+    const dropArea = document.getElementById('drop-area');
     const processButton = document.getElementById('processButton');
-    const plotType = document.getElementById('plotType');
-    const radarChartContent = document.getElementById('radarChart');
-    const barChartContent = document.getElementById('barChart');
-    const boxPlotContent = document.getElementById('boxPlot');
-    const interpretationPanel = document.getElementById('interpretationPanel');
+    const barChartDiv = document.getElementById('barChart');
+    const radarChartDiv = document.getElementById('radarChart');
     const dataTable = document.getElementById('dataTable');
-    const downloadButton = document.getElementById('downloadButton');
 
     dropArea.addEventListener('click', () => {
         fileInput.click();
@@ -52,12 +48,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     }));
 
                     const scores = calculateSUSScores(susData);
-                    const averageScore = calculateAverageScore(scores);
+                    renderBarChart(scores);
                     renderRadarChart(susData);
-                    renderBarChart(susData, scores);
-                    renderBoxPlot(averageScore);
                     renderTable(susData, scores);
-                    displayInterpretation(averageScore);
                 }
             });
         } else {
@@ -73,8 +66,23 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function calculateAverageScore(scores) {
-        return scores.reduce((a, b) => a + b, 0) / scores.length;
+    function renderBarChart(scores) {
+        const barChartSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+            description: 'A bar chart of SUS scores.',
+            data: {
+                values: scores.map((score, index) => ({ user: `User ${index + 1}`, score }))
+            },
+            mark: 'bar',
+            encoding: {
+                x: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
+                y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
+            },
+            width: 'container',  // Ensure the chart scales to the container
+            height: 'container'
+        };
+
+        vegaEmbed('#barChart', barChartSpec).catch(console.error);
     }
 
     function renderRadarChart(data) {
@@ -91,57 +99,25 @@ document.addEventListener('DOMContentLoaded', function () {
             Q10: average(data.map(item => item.Q10))
         };
 
-        const radarData = Object.keys(averageScores).map(key => ({ question: key, score: averageScores[key] }));
-
         const radarChartSpec = {
             $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'Radar chart showing average scores for each SUS question',
-            data: { values: radarData },
+            description: 'A radar chart of average SUS question scores.',
+            data: {
+                values: Object.keys(averageScores).map(key => ({ question: key, score: averageScores[key] }))
+            },
             mark: { type: 'line', point: true },
             encoding: {
-                theta: { field: 'question', type: 'nominal', sort: null },
-                radius: { field: 'score', type: 'quantitative', scale: { domain: [0, 5] } }
-            }
+                theta: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
+                radius: { field: 'score', type: 'quantitative', axis: { title: 'Average Score' } }
+            },
+            width: 'container',  // Ensure the chart scales to the container
+            height: 'container'
         };
 
-        vegaEmbed('#radarChart', radarChartSpec);
-    }
-
-    function renderBarChart(data, scores) {
-        const barData = data.map((item, index) => ({ user: `User ${index + 1}`, score: scores[index] }));
-
-        const barChartSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'Bar chart showing individual SUS scores',
-            data: { values: barData },
-            mark: 'bar',
-            encoding: {
-                x: { field: 'user', type: 'nominal', axis: { title: 'User' } },
-                y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
-            }
-        };
-
-        vegaEmbed('#barChart', barChartSpec);
-    }
-
-    function renderBoxPlot(averageScore) {
-        boxPlotContent.innerHTML = `<h2>SUS - Average Score: ${averageScore.toFixed(2)}</h2>`;
+        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
     }
 
     function renderTable(data, scores) {
-        const averageScores = {
-            Q1: average(data.map(item => item.Q1)),
-            Q2: average(data.map(item => item.Q2)),
-            Q3: average(data.map(item => item.Q3)),
-            Q4: average(data.map(item => item.Q4)),
-            Q5: average(data.map(item => item.Q5)),
-            Q6: average(data.map(item => item.Q6)),
-            Q7: average(data.map(item => item.Q7)),
-            Q8: average(data.map(item => item.Q8)),
-            Q9: average(data.map(item => item.Q9)),
-            Q10: average(data.map(item => item.Q10))
-        };
-
         dataTable.innerHTML = `
             <tr>
                 <th>User</th>
@@ -172,61 +148,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${row.Q10}</td>
                     <td>${scores[index]}</td>
                 </tr>`).join('')}
-            <tr>
-                <td><strong>Average</strong></td>
-                <td>${averageScores.Q1.toFixed(2)}</td>
-                <td>${averageScores.Q2.toFixed(2)}</td>
-                <td>${averageScores.Q3.toFixed(2)}</td>
-                <td>${averageScores.Q4.toFixed(2)}</td>
-                <td>${averageScores.Q5.toFixed(2)}</td>
-                <td>${averageScores.Q6.toFixed(2)}</td>
-                <td>${averageScores.Q7.toFixed(2)}</td>
-                <td>${averageScores.Q8.toFixed(2)}</td>
-                <td>${averageScores.Q9.toFixed(2)}</td>
-                <td>${averageScores.Q10.toFixed(2)}</td>
-                <td>${average(scores).toFixed(2)}</td>
-            </tr>
-        `;
-    }
-
-    function displayInterpretation(averageScore) {
-        interpretationPanel.innerHTML = `
-            <h2>Interpretation</h2>
-            <p>SUS - Average Score: ${averageScore.toFixed(2)}</p>
-            <p>The average SUS score is ${averageScore.toFixed(2)}.</p>
-            <p>A score above 68 is considered above average, while a score below 68 is considered below average.</p>
-            <p>Score Ranges:
-                <ul>
-                    <li>0-25: Poor</li>
-                    <li>26-50: OK</li>
-                    <li>51-75: Good</li>
-                    <li>76-100: Excellent</li>
-                </ul>
-            </p>
-            <p>Percentiles:
-                <ul>
-                    <li>Top 10%: Excellent</li>
-                    <li>Top 30%: Good</li>
-                    <li>Bottom 30%: OK</li>
-                    <li>Bottom 10%: Poor</li>
-                </ul>
-            </p>
         `;
     }
 
     function average(arr) {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
-
-    downloadButton.addEventListener('click', () => {
-        const csvContent = "data:text/csv;charset=utf-8," + 
-            Array.from(dataTable.rows).map(row => Array.from(row.cells).map(cell => cell.innerText).join(",")).join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "sus_data.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
 });

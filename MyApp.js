@@ -5,58 +5,74 @@ document.addEventListener('DOMContentLoaded', () => {
     const barChartDiv = document.getElementById('barChart');
     const radarChartDiv = document.getElementById('radarChart');
     const dataTable = document.getElementById('dataTable');
+    let susData = []; // Global variable to store SUS data
+    let scores = []; // Global variable to store SUS scores
 
-    dropArea.addEventListener('click', () => {
-        fileInput.click();
-    });
+    initializeEventListeners();
 
-    dropArea.addEventListener('dragover', (event) => {
+    function initializeEventListeners() {
+        dropArea.addEventListener('click', () => fileInput.click());
+        dropArea.addEventListener('dragover', handleDragOver);
+        dropArea.addEventListener('dragleave', handleDragLeave);
+        dropArea.addEventListener('drop', handleFileDrop);
+        processButton.addEventListener('click', handleFileProcess);
+        document.getElementById('downloadButton').addEventListener('click', handleDownload);
+    }
+
+    function handleDragOver(event) {
         event.preventDefault();
         dropArea.classList.add('dragover');
-    });
+    }
 
-    dropArea.addEventListener('dragleave', () => {
+    function handleDragLeave() {
         dropArea.classList.remove('dragover');
-    });
+    }
 
-    dropArea.addEventListener('drop', (event) => {
+    function handleFileDrop(event) {
         event.preventDefault();
         dropArea.classList.remove('dragover');
         const files = event.dataTransfer.files;
         if (files.length) {
             fileInput.files = files;
         }
-    });
+    }
 
-    processButton.addEventListener('click', () => {
+    function handleFileProcess() {
         const file = fileInput.files[0];
         if (file) {
             Papa.parse(file, {
                 header: true,
-                complete: function(results) {
-                    const susData = results.data.map(row => ({
-                        Q1: parseInt(row.Q1),
-                        Q2: parseInt(row.Q2),
-                        Q3: parseInt(row.Q3),
-                        Q4: parseInt(row.Q4),
-                        Q5: parseInt(row.Q5),
-                        Q6: parseInt(row.Q6),
-                        Q7: parseInt(row.Q7),
-                        Q8: parseInt(row.Q8),
-                        Q9: parseInt(row.Q9),
-                        Q10: parseInt(row.Q10)
-                    }));
-
-                    const scores = calculateSUSScores(susData);
-                    renderBarChart(scores);
-                    renderRadarChart(susData);
-                    renderTable(susData, scores);
+                complete: (results) => {
+                    try {
+                        susData = parseSUSData(results.data);
+                        scores = calculateSUSScores(susData);
+                        renderBarChart(scores);
+                        renderRadarChart(susData);
+                        renderTable(susData, scores);
+                    } catch (error) {
+                        alert('Error processing the file: ' + error.message);
+                    }
                 }
             });
         } else {
             alert('Please select a file to process.');
         }
-    });
+    }
+
+    function parseSUSData(data) {
+        return data.map(row => ({
+            Q1: parseInt(row.Q1),
+            Q2: parseInt(row.Q2),
+            Q3: parseInt(row.Q3),
+            Q4: parseInt(row.Q4),
+            Q5: parseInt(row.Q5),
+            Q6: parseInt(row.Q6),
+            Q7: parseInt(row.Q7),
+            Q8: parseInt(row.Q8),
+            Q9: parseInt(row.Q9),
+            Q10: parseInt(row.Q10)
+        }));
+    }
 
     function calculateSUSScores(data) {
         return data.map(item => {
@@ -78,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 x: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
                 y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
             },
-            width: 'container',  // Ensure the chart scales to the container
+            width: 'container',
             height: 'container'
         };
 
@@ -86,19 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderRadarChart(data) {
-        const averageScores = {
-            Q1: average(data.map(item => item.Q1)),
-            Q2: average(data.map(item => item.Q2)),
-            Q3: average(data.map(item => item.Q3)),
-            Q4: average(data.map(item => item.Q4)),
-            Q5: average(data.map(item => item.Q5)),
-            Q6: average(data.map(item => item.Q6)),
-            Q7: average(data.map(item => item.Q7)),
-            Q8: average(data.map(item => item.Q8)),
-            Q9: average(data.map(item => item.Q9)),
-            Q10: average(data.map(item => item.Q10))
-        };
-
+        const averageScores = calculateAverageScores(data);
         const radarChartSpec = {
             $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
             description: 'A radar chart of average SUS question scores.',
@@ -110,11 +114,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 theta: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
                 radius: { field: 'score', type: 'quantitative', axis: { title: 'Average Score' } }
             },
-            width: 'container',  // Ensure the chart scales to the container
+            width: 'container',
             height: 'container'
         };
 
         vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
+    }
+
+    function calculateAverageScores(data) {
+        return {
+            Q1: average(data.map(item => item.Q1)),
+            Q2: average(data.map(item => item.Q2)),
+            Q3: average(data.map(item => item.Q3)),
+            Q4: average(data.map(item => item.Q4)),
+            Q5: average(data.map(item => item.Q5)),
+            Q6: average(data.map(item => item.Q6)),
+            Q7: average(data.map(item => item.Q7)),
+            Q8: average(data.map(item => item.Q8)),
+            Q9: average(data.map(item => item.Q9)),
+            Q10: average(data.map(item => item.Q10))
+        };
     }
 
     function renderTable(data, scores) {
@@ -153,5 +172,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function average(arr) {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    function handleDownload() {
+        const csvContent = generateCSV(susData, scores);
+        downloadCSV(csvContent, 'processed_data.csv');
+    }
+
+    function generateCSV(data, scores) {
+        const headers = ['User', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'SUS Score'];
+        const rows = data.map((row, index) => [
+            `User ${index + 1}`, row.Q1, row.Q2, row.Q3, row.Q4, row.Q5, row.Q6, row.Q7, row.Q8, row.Q9, row.Q10, scores[index]
+        ]);
+
+        return [headers, ...rows].map(row => row.join(',')).join('\n');
+    }
+
+    function downloadCSV(content, filename) {
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     }
 });

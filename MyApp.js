@@ -51,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         scores = calculateSUSScores(susData);
                         renderBarChart(scores);
                         renderRadarChart(susData);
-                        renderBoxPlot(susData, scores);
+                        renderHeatmap(susData);
+                        renderBoxPlot(susData);
                         renderInterpretationPanel(scores);
                         renderTable(susData, scores);
                     }
@@ -138,8 +139,57 @@ document.addEventListener('DOMContentLoaded', () => {
         vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
     }
 
-    function renderBoxPlot(data, scores) {
-        // Render your box plot here using Vega-Lite
+    function renderHeatmap(data) {
+        const heatmapData = [];
+        data.forEach((row, index) => {
+            for (let i = 1; i <= 10; i++) {
+                heatmapData.push({ question: `Q${i}`, score: row[`Q${i}`] });
+            }
+        });
+
+        const heatmapSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+            description: 'A heatmap showing response distribution.',
+            data: {
+                values: heatmapData
+            },
+            mark: 'rect',
+            encoding: {
+                x: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
+                y: { field: 'score', type: 'quantitative', bin: true, axis: { title: 'Score' } },
+                color: { aggregate: 'count', type: 'quantitative', legend: { title: 'Count' } }
+            },
+            width: 'container',
+            height: 'container'
+        };
+
+        vegaEmbed('#heatmapChart', heatmapSpec).catch(console.error);
+    }
+
+    function renderBoxPlot(data) {
+        const boxPlotData = [];
+        data.forEach((row, index) => {
+            for (let i = 1; i <= 10; i++) {
+                boxPlotData.push({ question: `Q${i}`, score: row[`Q${i}`] });
+            }
+        });
+
+        const boxPlotSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+            description: 'A box plot showing score distribution per question.',
+            data: {
+                values: boxPlotData
+            },
+            mark: 'boxplot',
+            encoding: {
+                x: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
+                y: { field: 'score', type: 'quantitative', axis: { title: 'Score' } }
+            },
+            width: 'container',
+            height: 'container'
+        };
+
+        vegaEmbed('#boxPlotChart', boxPlotSpec).catch(console.error);
     }
 
     function renderInterpretationPanel(scores) {

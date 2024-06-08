@@ -19,45 +19,41 @@
         <button id="processButton" class="action-button">Process File</button>
         <div id="chartContainer">
             <div class="chart-row">
-                <canvas id="radarChart">Radar Chart to be here</canvas>
-                <canvas id="barChart">Bar Chart to be here</canvas>
+                <canvas id="radarChart"></canvas>
+                <canvas id="barChart"></canvas>
             </div>
             <div class="chart-row">
-                <div id="heatmapChart">Heatmap will be here</div>
-                <canvas id="boxPlotChart">Box Plot will be here</canvas>
+                <div id="heatmapChart"></div>
+                <canvas id="boxPlotChart"></canvas>
             </div>
             <div id="interpretationPanel">Interpretation Panel</div>
             <div id="downloadSection">
-                <button id="downloadButton" class="action-button">Dowload Data</button>
-                <div id="downloadOptions" style="display: none;">
-                    <button onclick="downloadData()">Download Data</button>
-                    <button onclick="downloadRadarChart()">Download Radar Chart</button>
-                    <button onclick="downloadBarChart()">Download Bar Chart</button>
-                </div>
+                <button id="downloadButton" class="action-button">Download Data</button>
             </div>
         </div>
         <div id="tableContainer">
             <h1>Data</h1>
             <div class="table-responsive">
                 <table id="dataTable">
-                    <tr>
-                        <th>User</th>
-                        <th>Q1</th>
-                        <th>Q2</th>
-                        <th>Q3</th>
-                        <th>Q4</th>
-                        <th>Q5</th>
-                        <th>Q6</th>
-                        <th>Q7</th>
-                        <th>Q8</th>
-                        <th>Q9</th>
-                        <th>Q10</th>
-                        <th>SUS Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Q1</th>
+                            <th>Q2</th>
+                            <th>Q3</th>
+                            <th>Q4</th>
+                            <th>Q5</th>
+                            <th>Q6</th>
+                            <th>Q7</th>
+                            <th>Q8</th>
+                            <th>Q9</th>
+                            <th>Q10</th>
+                            <th>SUS Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated here -->
+                    </tbody>
                 </table>
             </div>
         </div>

@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const radarChartCtx = document.getElementById('radarChart').getContext('2d');
     const barChartCtx = document.getElementById('barChart').getContext('2d');
+    const heatmapChartCtx = document.getElementById('heatmapChart').getContext('2d');
     const boxPlotChartCtx = document.getElementById('boxPlotChart').getContext('2d');
 
     console.log("DOM fully loaded and parsed");
@@ -28,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBarChart(scores) {
-        console.log("Rendering Bar Chart with scores:", scores);
         new Chart(barChartCtx, {
             type: 'bar',
             data: {
@@ -75,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
             Q10: average(data.map(item => item.Q10))
         };
 
-        console.log("Rendering Radar Chart with data:", averageScores);
         new Chart(radarChartCtx, {
             type: 'radar',
             data: {
@@ -83,4 +82,130 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     label: 'Average Score',
                     data: Object.values(averageScores),
-                    backgroundColor: 'rgba(255, 99, 1
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 5,
+                        title: {
+                            display: true,
+                            text: 'Average Score'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderBoxPlot(data) {
+        const boxPlotData = [];
+        data.forEach((row, index) => {
+            for (let i = 1; i <= 10; i++) {
+                boxPlotData.push({ question: `Q${i}`, score: row[`Q${i}`] });
+            }
+        });
+
+        new Chart(boxPlotChartCtx, {
+            type: 'boxplot', // This requires a plugin or custom implementation
+            data: {
+                datasets: [{
+                    label: 'Scores',
+                    data: boxPlotData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Question'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Score'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderHeatmap(data) {
+        const heatmapData = [];
+        data.forEach((row, index) => {
+            for (let i = 1; i <= 10; i++) {
+                heatmapData.push({ x: i, y: index + 1, v: row[`Q${i}`] });
+            }
+        });
+
+        new Chart(heatmapChartCtx, {
+            type: 'matrix',
+            data: {
+                datasets: [{
+                    label: 'Heatmap',
+                    data: heatmapData,
+                    backgroundColor(context) {
+                        const value = context.dataset.data[context.dataIndex].v;
+                        const alpha = (value - 1) / 4;
+                        return `rgba(255, 99, 132, ${alpha})`;
+                    },
+                    width(context) {
+                        const a = context.chart.chartArea || {};
+                        return (a.right - a.left) / 10 - 1;
+                    },
+                    height(context) {
+                        const a = context.chart.chartArea || {};
+                        return (a.bottom - a.top) / heatmapData.length - 1;
+                    }
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'top',
+                        ticks: {
+                            stepSize: 1
+                        },
+                        title: {
+                            display: true,
+                            text: 'Question'
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        ticks: {
+                            stepSize: 1
+                        },
+                        title: {
+                            display: true,
+                            text: 'User'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    function average(arr) {
+        return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+});

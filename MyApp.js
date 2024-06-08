@@ -1,85 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('fileInput');
-    const dropArea = document.getElementById('drop-area');
-    const processButton = document.getElementById('processButton');
     const radarChartCtx = document.getElementById('radarChart').getContext('2d');
     const barChartCtx = document.getElementById('barChart').getContext('2d');
     const boxPlotChartCtx = document.getElementById('boxPlotChart').getContext('2d');
-    const interpretationPanelDiv = document.getElementById('interpretationPanel');
-    const dataTable = document.getElementById('dataTable').querySelector('tbody');
-    const downloadButton = document.getElementById('downloadButton');
 
-    let susData = [];
-    let scores = [];
+    const sampleData = [
+        { Q1: 3, Q2: 2, Q3: 4, Q4: 3, Q5: 5, Q6: 2, Q7: 3, Q8: 4, Q9: 3, Q10: 5 },
+        { Q1: 4, Q2: 3, Q3: 5, Q4: 4, Q5: 5, Q6: 3, Q7: 4, Q8: 4, Q9: 4, Q10: 5 },
+        { Q1: 5, Q2: 4, Q3: 5, Q4: 4, Q5: 5, Q6: 4, Q7: 5, Q8: 4, Q9: 5, Q10: 5 }
+    ];
 
-    initializeEventListeners();
+    const scores = calculateSUSScores(sampleData);
 
-    function initializeEventListeners() {
-        dropArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        dropArea.addEventListener('dragover', (event) => {
-            event.preventDefault();
-            dropArea.classList.add('dragover');
-        });
-
-        dropArea.addEventListener('dragleave', () => {
-            dropArea.classList.remove('dragover');
-        });
-
-        dropArea.addEventListener('drop', (event) => {
-            event.preventDefault();
-            dropArea.classList.remove('dragover');
-            const files = event.dataTransfer.files;
-            if (files.length) {
-                fileInput.files = files;
-            }
-        });
-
-        processButton.addEventListener('click', handleFileProcess);
-        downloadButton.addEventListener('click', handleDownload);
-    }
-
-    function handleFileProcess() {
-        try {
-            const file = fileInput.files[0];
-            if (file) {
-                Papa.parse(file, {
-                    header: true,
-                    complete: function(results) {
-                        susData = parseSUSData(results.data);
-                        scores = calculateSUSScores(susData);
-                        renderBarChart(scores);
-                        renderRadarChart(susData);
-                        renderHeatmap(susData);
-                        renderBoxPlot(susData);
-                        renderInterpretationPanel(scores);
-                        renderTable(susData, scores);
-                    }
-                });
-            } else {
-                alert('Please select a file to process.');
-            }
-        } catch (error) {
-            alert('Error processing file: ' + error.message);
-        }
-    }
-
-    function parseSUSData(data) {
-        return data.map(row => ({
-            Q1: parseInt(row.Q1),
-            Q2: parseInt(row.Q2),
-            Q3: parseInt(row.Q3),
-            Q4: parseInt(row.Q4),
-            Q5: parseInt(row.Q5),
-            Q6: parseInt(row.Q6),
-            Q7: parseInt(row.Q7),
-            Q8: parseInt(row.Q8),
-            Q9: parseInt(row.Q9),
-            Q10: parseInt(row.Q10)
-        }));
-    }
+    renderBarChart(scores);
+    renderRadarChart(sampleData);
+    renderBoxPlot(sampleData);
+    renderHeatmap(sampleData);
 
     function calculateSUSScores(data) {
         return data.map(item => {
@@ -232,61 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         vegaEmbed('#heatmapChart', heatmapSpec).catch(console.error);
     }
 
-    function renderInterpretationPanel(scores) {
-        const avgScore = average(scores);
-        const interpretation = getSUSInterpretation(avgScore);
-        interpretationPanelDiv.innerHTML = `
-            <h3>Interpretation</h3>
-            <p>Average SUS Score: ${avgScore.toFixed(2)}</p>
-            <p>${interpretation}</p>
-        `;
-    }
-
-    function getSUSInterpretation(score) {
-        if (score >= 85) return "Excellent";
-        if (score >= 70) return "Good";
-        if (score >= 50) return "OK";
-        return "Poor";
-    }
-
-    function renderTable(data, scores) {
-        dataTable.innerHTML = data.map((row, index) => `
-            <tr>
-                <td>User ${index + 1}</td>
-                <td>${row.Q1}</td>
-                <td>${row.Q2}</td>
-                <td>${row.Q3}</td>
-                <td>${row.Q4}</td>
-                <td>${row.Q5}</td>
-                <td>${row.Q6}</td>
-                <td>${row.Q7}</td>
-                <td>${row.Q8}</td>
-                <td>${row.Q9}</td>
-                <td>${row.Q10}</td>
-                <td>${scores[index]}</td>
-            </tr>`).join('');
-    }
-
     function average(arr) {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
-    }
-
-    function handleDownload() {
-        const csvData = susData.map((row, index) => ({
-            user: `User ${index + 1}`,
-            ...row,
-            susScore: scores[index]
-        }));
-
-        const csvContent = Papa.unparse(csvData);
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'SUSData.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     }
 });

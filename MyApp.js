@@ -109,15 +109,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const boxPlotData = [];
         data.forEach((row, index) => {
             for (let i = 1; i <= 10; i++) {
-                boxPlotData.push({ question: `Q${i}`, score: row[`Q${i}`] });
+                boxPlotData.push(row[`Q${i}`]);
             }
         });
 
         new Chart(boxPlotChartCtx, {
-            type: 'boxplot', // This requires a plugin or custom implementation
+            type: 'boxplot',
             data: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'],
                 datasets: [{
-                    label: 'Scores',
+                    label: 'Question Scores',
                     data: boxPlotData,
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',

@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const barChartCtx = document.getElementById('barChart').getContext('2d');
     const boxPlotChartCtx = document.getElementById('boxPlotChart').getContext('2d');
 
+    console.log("DOM fully loaded and parsed");
+
     const sampleData = [
         { Q1: 3, Q2: 2, Q3: 4, Q4: 3, Q5: 5, Q6: 2, Q7: 3, Q8: 4, Q9: 3, Q10: 5 },
         { Q1: 4, Q2: 3, Q3: 5, Q4: 4, Q5: 5, Q6: 3, Q7: 4, Q8: 4, Q9: 4, Q10: 5 },
@@ -10,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const scores = calculateSUSScores(sampleData);
+    console.log("Scores calculated:", scores);
 
     renderBarChart(scores);
     renderRadarChart(sampleData);
@@ -25,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBarChart(scores) {
+        console.log("Rendering Bar Chart with scores:", scores);
         new Chart(barChartCtx, {
             type: 'bar',
             data: {
@@ -71,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Q10: average(data.map(item => item.Q10))
         };
 
+        console.log("Rendering Radar Chart with data:", averageScores);
         new Chart(radarChartCtx, {
             type: 'radar',
             data: {
@@ -78,96 +83,4 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     label: 'Average Score',
                     data: Object.values(averageScores),
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    r: {
-                        angleLines: {
-                            display: true
-                        },
-                        suggestedMin: 0,
-                        suggestedMax: 5,
-                        title: {
-                            display: true,
-                            text: 'Average Score'
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function renderBoxPlot(data) {
-        const boxPlotData = [];
-        data.forEach((row, index) => {
-            for (let i = 1; i <= 10; i++) {
-                boxPlotData.push({ question: `Q${i}`, score: row[`Q${i}`] });
-            }
-        });
-
-        // Assuming we have a custom chart for box plot since Chart.js doesn't support it natively
-        new Chart(boxPlotChartCtx, {
-            type: 'boxplot', // This requires a plugin or custom implementation
-            data: {
-                datasets: [{
-                    label: 'Scores',
-                    data: boxPlotData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Question'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Score'
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function renderHeatmap(data) {
-        const heatmapData = [];
-        data.forEach((row, index) => {
-            for (let i = 1; i <= 10; i++) {
-                heatmapData.push({ question: `Q${i}`, score: row[`Q${i}`] });
-            }
-        });
-
-        const heatmapSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A heatmap showing response distribution.',
-            data: {
-                values: heatmapData
-            },
-            mark: 'rect',
-            encoding: {
-                x: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
-                y: { field: 'score', type: 'quantitative', bin: true, axis: { title: 'Score' } },
-                color: { aggregate: 'count', type: 'quantitative', legend: { title: 'Count' } }
-            },
-            width: 'container',
-            height: 'container'
-        };
-
-        vegaEmbed('#heatmapChart', heatmapSpec).catch(console.error);
-    }
-
-    function average(arr) {
-        return arr.reduce((a, b) => a + b, 0) / arr.length;
-    }
-});
+                    backgroundColor: 'rgba(255, 99, 1

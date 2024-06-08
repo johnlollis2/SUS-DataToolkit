@@ -2,8 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     const dropArea = document.getElementById('drop-area');
     const processButton = document.getElementById('processButton');
-    const radarChartDiv = document.getElementById('radarChart');
-    const individualScoreChartDiv = document.getElementById('individualScoreChart');
+    const radarChartCanvas = document.getElementById('radarChart').getContext('2d');
+    const barChartCanvas = document.getElementById('barChart').getContext('2d');
+    const boxPlotChartCanvas = document.getElementById('boxPlotChart').getContext('2d');
     const interpretationPanelDiv = document.getElementById('interpretationPanel');
     const dataTable = document.getElementById('dataTable').querySelector('tbody');
     const downloadButton = document.getElementById('downloadButton');
@@ -33,11 +34,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const files = event.dataTransfer.files;
             if (files.length) {
                 fileInput.files = files;
+                handleFileProcess(); // Automatically process the file on drop
             }
         });
 
+        fileInput.addEventListener('change', handleFileSelect);
         processButton.addEventListener('click', handleFileProcess);
         downloadButton.addEventListener('click', handleDownload);
+    }
+
+    function handleFileSelect(event) {
+        if (event.target.files.length > 0) {
+            handleFileProcess(); // Automatically process the file on selection
+        }
     }
 
     function handleFileProcess() {
@@ -89,22 +98,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBarChart(scores) {
-        const barChartSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A bar chart of SUS scores.',
-            data: {
-                values: scores.map((score, index) => ({ user: `User ${index + 1}`, score }))
-            },
-            mark: 'bar',
-            encoding: {
-                x: { field: 'user', type: 'ordinal', axis: { title: 'User' } },
-                y: { field: 'score', type: 'quantitative', axis: { title: 'SUS Score' } }
-            },
-            width: 'container',
-            height: 'container'
+        const data = {
+            labels: scores.map((score, index) => `User ${index + 1}`),
+            datasets: [{
+                label: 'SUS Score',
+                data: scores,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
         };
 
-        vegaEmbed('#individualScoreChart', barChartSpec).catch(console.error);
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'User' } },
+                    y: { title: { display: true, text: 'SUS Score' } }
+                }
+            }
+        };
+
+        new Chart(barChartCanvas, config);
     }
 
     function renderRadarChart(data) {
@@ -121,22 +138,37 @@ document.addEventListener('DOMContentLoaded', () => {
             Q10: average(data.map(item => item.Q10))
         };
 
-        const radarChartSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A radar chart of average SUS question scores.',
-            data: {
-                values: Object.keys(averageScores).map(key => ({ question: key, score: averageScores[key] }))
-            },
-            mark: { type: 'line', point: true },
-            encoding: {
-                theta: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
-                radius: { field: 'score', type: 'quantitative', axis: { title: 'Average Score' } }
-            },
-            width: 'container',
-            height: 'container'
+        const labels = Object.keys(averageScores);
+        const dataValues = Object.values(averageScores);
+
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Average Score',
+                data: dataValues,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
         };
 
-        vegaEmbed('#radarChart', radarChartSpec).catch(console.error);
+        const config = {
+            type: 'radar',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    r: { 
+                        angleLines: { display: true },
+                        suggestedMin: 0,
+                        suggestedMax: 5,
+                        beginAtZero: true
+                    }
+                }
+            }
+        };
+
+        new Chart(radarChartCanvas, config);
     }
 
     function renderHeatmap(data) {
@@ -167,29 +199,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBoxPlot(data) {
-        const boxPlotData = [];
-        data.forEach((row, index) => {
-            for (let i = 1; i <= 10; i++) {
-                boxPlotData.push({ question: `Q${i}`, score: row[`Q${i}`] });
-            }
-        });
+        const labels = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'];
+        const datasets = labels.map(label => ({
+            label: label,
+            data: data.map(d => d[label])
+        }));
 
-        const boxPlotSpec = {
-            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-            description: 'A box plot showing score distribution per question.',
+        const config = {
+            type: 'boxplot',
             data: {
-                values: boxPlotData
+                labels: labels,
+                datasets: [{
+                    label: 'Score Distribution',
+                    data: datasets,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
             },
-            mark: 'boxplot',
-            encoding: {
-                x: { field: 'question', type: 'nominal', axis: { title: 'Question' } },
-                y: { field: 'score', type: 'quantitative', axis: { title: 'Score' } }
-            },
-            width: 'container',
-            height: 'container'
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Question' } },
+                    y: { title: { display: true, text: 'Score' } }
+                }
+            }
         };
 
-        vegaEmbed('#boxPlotChart', boxPlotSpec).catch(console.error);
+        new Chart(boxPlotChartCanvas, config);
     }
 
     function renderInterpretationPanel(scores) {

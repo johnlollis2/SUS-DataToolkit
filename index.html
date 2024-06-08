@@ -4,60 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AUTOMATED - SUS - DATATOOLKIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="Constyles.css">
 </head>
 <body>
-    <div id="header">
-        <h1>AUTOMATED - SUS - DATATOOLKIT</h1>
+    <div class="grid-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="menu-icon" onclick="openSidebar()">
+                <span class="material-icons-outlined">menu</span>
+            </div>
+            <div class="header-left">
+                <span class="material-icons-outlined">assessment</span>
+            </div>
+            <div class="main-title">
+                <h2>System Usability Scores Toolkit</h2>
+            </div>
+        </header>
+        <!-- End Header -->
+
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-title">
+                <div class="sidebar-brand">
+                    <span class="material-icons-outlined">assessment</span> SUS DATA TOOLKIT
+                </div>
+                <span class="material-icons-outlined" onclick="closeSidebar()">close</span>
+            </div>
+
+            <ul class="sidebar-list">
+                <li class="sidebar-list-item">
+                    <a href="#" target="_blank">
+                        <span class="material-icons-outlined">bar_chart</span> Charts
+                    </a>
+                </li>
+                <li class="sidebar-list-item">
+                    <a href="#" target="_blank">
+                        <span class="material-icons-outlined">table_chart</span> Data Table
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        <!-- End Sidebar -->
+
+        <!-- Main Content -->
+        <main class="main-container">
+            
+            <div class="main-cards">
+                <div class="card">
+                    <div class="card-inner">
+                        <h3>UPLOAD FILE</h3>
+                        <span class="material-icons-outlined">upload_file</span>
+                    </div>
+                    <div id="drop-area">
+                        <p>Drag and Drop or <label for="fileInput" style="cursor:pointer; text-decoration:underline;">click here</label> to select the File</p>
+                        <input type="file" id="fileInput" accept=".csv"/>
+                    </div>
+                    <button id="processButton" class="action-button">Process File</button>
+                </div>
+            </div>
+
+            <div class="charts">
+                <div class="charts-card">
+                    <h2 class="chart-title">Radar Chart</h2>
+                    <canvas id="radarChart"></canvas>
+                </div>
+
+                <div class="charts-card">
+                    <h2 class="chart-title">Bar Chart</h2>
+                    <canvas id="barChart"></canvas>
+                </div>
+
+                <div class="charts-card">
+                    <h2 class="chart-title">Heatmap</h2>
+                    <canvas id="heatmapChart"></canvas>
+                </div>
+
+                <div class="charts-card">
+                    <h2 class="chart-title">Box Plot</h2>
+                    <canvas id="boxPlotChart"></canvas>
+                </div>
+            </div>
+
+            <div id="tableContainer">
+                <h2>Data Table</h2>
+                <div class="table-responsive">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Q1</th>
+                                <th>Q2</th>
+                                <th>Q3</th>
+                                <th>Q4</th>
+                                <th>Q5</th>
+                                <th>Q6</th>
+                                <th>Q7</th>
+                                <th>Q8</th>
+                                <th>Q9</th>
+                                <th>Q10</th>
+                                <th>SUS Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+        <!-- End Main Content -->
+
+        <!-- Interpretation Panel -->
+        <aside id="interpretation-panel" class="sidebar">
+            <div class="sidebar-title">
+                <div class="sidebar-brand">
+                    <span class="material-icons-outlined">insights</span> INTERPRETATION
+                </div>
+            </div>
+            <div id="interpretationPanel">Interpretation Panel Content</div>
+        </aside>
+        <!-- End Interpretation Panel -->
     </div>
-    <div id="app">
-        <div id="drop-area">
-            <p>Drag and Drop or <label for="fileInput" style="cursor:pointer; text-decoration:underline;">click here</label> to select the File</p>
-            <input type="file" id="fileInput" accept=".csv" hidden/>
-        </div>
-        <div id="file-info"></div>
-        <button id="processButton" class="action-button">Process File</button>
-        <div id="chartContainer">
-            <div class="chart-row">
-                <canvas id="radarChart"></canvas>
-                <canvas id="barChart"></canvas>
-            </div>
-            <div class="chart-row">
-                <canvas id="heatmapChart"></canvas>
-                <canvas id="boxPlotChart"></canvas>
-            </div>
-            <div id="interpretationPanel">Interpretation Panel</div>
-            <div id="downloadSection">
-                <button id="downloadButton" class="action-button">Download Data</button>
-            </div>
-        </div>
-        <div id="tableContainer">
-            <h1>Data</h1>
-            <div class="table-responsive">
-                <table id="dataTable">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Q1</th>
-                            <th>Q2</th>
-                            <th>Q3</</th>
-                            <th>Q4</th>
-                            <th>Q5</th>
-                            <th>Q6</th>
-                            <th>Q7</th>
-                            <th>Q8</th>
-                            <th>Q9</th>
-                            <th>Q10</th>
-                            <th>SUS Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Data will be populated here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.0.0"></script>

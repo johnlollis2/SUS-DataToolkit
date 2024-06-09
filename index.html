@@ -58,10 +58,12 @@
                     </div>
                     <div id="drop-area">
                         <p>Drag and Drop or <label for="fileInput" style="cursor:pointer; text-decoration:underline;">click here</label> to select the File</p>
-                        <input type="file" id="fileInput" accept=".csv" style="display: none;" onchange="handleFileUpload(event)" />
+                        <input type="file" id="fileInput" accept=".csv" style="display: none;" />
                         <div id="fileInfo" style="margin-top: 10px;"></div>
                         <button id="removeFileButton" class="action-button" style="display: none;" onclick="removeFile()">Remove File</button>
                     </div>
+                    <button id="processButton" class="action-button">Process File</button>
+                </div>
                     <button id="processButton" class="action-button">Process File</button>
                 </div>
                 <div class="interpretation-panel">

@@ -6,25 +6,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log("DOM fully loaded and parsed");
 
-    const sampleData = [
-        { Q1: 3, Q2: 2, Q3: 4, Q4: 3, Q5: 5, Q6: 2, Q7: 3, Q8: 4, Q9: 3, Q10: 5 },
-        { Q1: 4, Q2: 3, Q3: 5, Q4: 4, Q5: 5, Q6: 3, Q7: 4, Q8: 4, Q9: 4, Q10: 5 },
-        { Q1: 5, Q2: 4, Q3: 5, Q4: 4, Q5: 5, Q6: 4, Q7: 5, Q8: 4, Q9: 5, Q10: 5 }
-    ];
+    document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+    document.getElementById('processButton').addEventListener('click', processFile);
 
-    const scores = calculateSUSScores(sampleData);
-    console.log("Scores calculated:", scores);
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            document.getElementById('fileInfo').textContent = `File: ${file.name}`;
+            document.getElementById('removeFileButton').style.display = 'block';
+        } else {
+            document.getElementById('fileInfo').textContent = "";
+            document.getElementById('removeFileButton').style.display = 'none';
+        }
+    }
 
-    renderBarChart(scores);
-    renderRadarChart(sampleData);
-    renderBoxPlot(sampleData);
-    renderHeatmap(sampleData);
+    function removeFile() {
+        document.getElementById('fileInput').value = "";
+        document.getElementById('fileInfo').textContent = "";
+        document.getElementById('removeFileButton').style.display = 'none';
+    }
+
+    function processFile() {
+        const file = document.getElementById('fileInput').files[0];
+        if (file) {
+            Papa.parse(file, {
+                header: true,
+                dynamicTyping: true,
+                complete: function(results) {
+                    const data = results.data;
+                    console.log("Parsed data:", data);
+                    const scores = calculateSUSScores(data);
+                    console.log("Scores calculated:", scores);
+                    updateDataTable(data, scores);
+                    renderBarChart(scores);
+                    renderRadarChart(data);
+                    renderBoxPlot(data);
+                    renderHeatmap(data);
+                },
+                error: function(error) {
+                    console.error("Error parsing file:", error);
+                }
+            });
+        } else {
+            alert("Please upload a CSV file first.");
+        }
+    }
 
     function calculateSUSScores(data) {
         return data.map(item => {
             const positiveScores = (item.Q1 - 1) + (item.Q3 - 1) + (item.Q5 - 1) + (item.Q7 - 1) + (item.Q9 - 1);
             const negativeScores = (5 - item.Q2) + (5 - item.Q4) + (5 - item.Q6) + (5 - item.Q8) + (5 - item.Q10);
             return (positiveScores + negativeScores) * 2.5;
+        });
+    }
+
+    function updateDataTable(data, scores) {
+        const tbody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+        tbody.innerHTML = ""; // Clear existing data
+        data.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            const userCell = document.createElement('td');
+            userCell.textContent = `User ${index + 1}`;
+            tr.appendChild(userCell);
+
+            for (let i = 1; i <= 10; i++) {
+                const cell = document.createElement('td');
+                cell.textContent = row[`Q${i}`];
+                tr.appendChild(cell);
+            }
+
+            const scoreCell = document.createElement('td');
+            scoreCell.textContent = scores[index];
+            tr.appendChild(scoreCell);
+
+            tbody.appendChild(tr);
         });
     }
 

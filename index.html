@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="Constyles.css">
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="grid-container">
@@ -64,44 +66,56 @@
                     </div>
                     <button id="processButton" class="action-button">Process File</button>
                 </div>
-                    <button id="processButton" class="action-button">Process File</button>
-                </div>
                 <div class="interpretation-panel">
                     <h3>Interpretation</h3>
                     <p>SUS Score:</p>
                     <p>Median:</p>
-                    <p>Standard Dv:</p>
-                    <p>Adjective:</p>
+                    <p>Standard Deviation:</p>
+                    <p>Adjective Rating:</p>
                     <p>Grade:</p>
                     <p>Acceptability:</p>
                 </div>
             </div>
 
-            <div class="charts">
+            <!-- Overall Usability Summary -->
+            <div class="chart-section">
                 <div class="charts-card">
-                    <h2 class="chart-title">Radar Chart</h2>
-                    <canvas id="radarChart"></canvas>
+                    <h2 class="chart-title">Adjective Ratings</h2>
+                    <canvas id="doughnutChart"></canvas>
                 </div>
-
                 <div class="charts-card">
-                    <h2 class="chart-title">Bar Chart</h2>
-                    <canvas id="barChart"></canvas>
-                </div>
-
-                <div class="charts-card">
-                    <h2 class="chart-title">Heatmap</h2>
-                    <canvas id="heatmapChart"></canvas>
-                </div>
-
-                <div class="charts-card">
-                    <h2 class="chart-title">Box Plot</h2>
-                    <canvas id="boxPlotChart"></canvas>
+                    <h2 class="chart-title">SUS Score Distribution</h2>
+                    <canvas id="histogramChart"></canvas>
                 </div>
             </div>
 
+            <!-- Detailed Usability Insights -->
+            <div class="chart-section">
+                <div class="charts-card">
+                    <h2 class="chart-title">Individual SUS Scores</h2>
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="charts-card">
+                    <h2 class="chart-title">Average Scores per Question</h2>
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- In-Depth Analysis -->
+            <div class="chart-section">
+                <div class="charts-card">
+                    <h2 class="chart-title">Scores Across Questions</h2>
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="charts-card">
+                    <h2 class="chart-title">Positive vs. Negative Questions</h2>
+                    <canvas id="groupedBarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Data Table -->
             <div id="tableContainer">
-                <h2>Data Table</h2>
-                <div class="table-responsive">
+                <h2>Data Table</                <div class="table-responsive">
                     <table id="dataTable">
                         <thead>
                             <tr>
@@ -131,9 +145,6 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.0.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot"></script>
     <script src="MyApp.js"></script>
 </body>
 </html>

@@ -24,11 +24,11 @@
         </header>
         <!-- End Header -->
 
-        <!-- Sidebar -->
+        <!-- Sidebar (Data Toolkit)-->
         <aside id="sidebar">
             <div class="sidebar-title">
                 <div class="sidebar-brand">
-                    <span class="material-icons-outlined">assessment</span> SUS DATA TOOLKIT
+                    <span class="material-icons-outlined">assessment</span> DATA TOOLKIT
                 </div>
                 <span class="material-icons-outlined" onclick="closeSidebar()">close</span>
             </div>
@@ -47,21 +47,31 @@
             </ul>
         </aside>
         <!-- End Sidebar -->
-
+       
         <!-- Main Content -->
-        <main class="main-container">
-            
+        <main class="main-container"> 
             <div class="main-cards">
                 <div class="card">
                     <div class="card-inner">
-                        <h3>UPLOAD FILE</h3>
+                        <h3>UPLOAD CSV FILE</h3>
                         <span class="material-icons-outlined">upload_file</span>
                     </div>
                     <div id="drop-area">
                         <p>Drag and Drop or <label for="fileInput" style="cursor:pointer; text-decoration:underline;">click here</label> to select the File</p>
-                        <input type="file" id="fileInput" accept=".csv"/>
+                        <input type="file" id="fileInput" accept=".csv" style="display: none;" onchange="handleFileUpload(event)" />
+                        <div id="fileInfo" style="margin-top: 10px;"></div>
+                        <button id="removeFileButton" class="action-button" style="display: none;" onclick="removeFile()">Remove File</button>
                     </div>
                     <button id="processButton" class="action-button">Process File</button>
+                </div>
+                <div class="interpretation-panel">
+                    <h3>Interpretation</h3>
+                    <p>SUS Score:</p>
+                    <p>Median:</p>
+                    <p>Standard Dv:</p>
+                    <p>Adjective:</p>
+                    <p>Grade:</p>
+                    <p>Acceptability:</p>
                 </div>
             </div>
 
@@ -115,17 +125,6 @@
             </div>
         </main>
         <!-- End Main Content -->
-
-        <!-- Interpretation Panel -->
-        <aside id="interpretation-panel" class="sidebar">
-            <div class="sidebar-title">
-                <div class="sidebar-brand">
-                    <span class="material-icons-outlined">insights</span> INTERPRETATION
-                </div>
-            </div>
-            <div id="interpretationPanel">Interpretation Panel Content</div>
-        </aside>
-        <!-- End Interpretation Panel -->
     </div>
 
     <!-- Scripts -->

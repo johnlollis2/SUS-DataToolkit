@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const histogramChartCtx = document.getElementById('histogramChart').getContext('2d');
     const groupedBarChartCtx = document.getElementById('groupedBarChart').getContext('2d');
 
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('fileInput');
+
     document.getElementById('fileInput').addEventListener('change', handleFileUpload);
     document.getElementById('processButton').addEventListener('click', processFile);
     document.getElementById('removeFileButton').addEventListener('click', removeFile);
@@ -14,6 +17,51 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.sidebar-list-item:nth-child(2)').addEventListener('click', () => showTab('dataTableTab'));
 
     let uploadedFile = null;
+
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false)
+        document.body.addEventListener(eventName, preventDefaults, false)
+    });
+
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+    });
+
+    // Handle dropped files
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        handleFiles(files);
+    }
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            if (file && file.type === 'text/csv') {
+                uploadedFile = file;
+                document.getElementById('fileInfo').textContent = `File: ${file.name}`;
+                document.getElementById('removeFileButton').style.display = 'block';
+            } else {
+                document.getElementById('fileInfo').textContent = "Please select a valid CSV file.";
+                document.getElementById('removeFileButton').style.display = 'none';
+                uploadedFile = null;
+            }
+        }
+    }
 
     function handleFileUpload(event) {
         const file = event.target.files[0];

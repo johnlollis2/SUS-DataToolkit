@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="Constyles.css">
-    <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -21,13 +20,13 @@
                 <span class="material-icons-outlined">assessment</span>
             </div>
             <div class="main-title">
-                <h2>System Usability Scores Toolkit</h2>
+                <h2>SYSTEM USABILITY SCORE ANALYSIS TOOLKIT</h2>
             </div>
         </header>
         <!-- End Header -->
 
         <!-- Sidebar (Data Toolkit)-->
-        <aside id="sidebar">
+        <aside id="sidebar" class="sidebar-closed">
             <div class="sidebar-title">
                 <div class="sidebar-brand">
                     <span class="material-icons-outlined">assessment</span> DATA TOOLKIT
@@ -36,107 +35,135 @@
             </div>
 
             <ul class="sidebar-list">
-                <li class="sidebar-list-item">
-                    <a href="#" target="_blank">
+                <li class="sidebar-list-item" onclick="showTab('chartsTab')">
+                    <a href="javascript:void(0)">
                         <span class="material-icons-outlined">bar_chart</span> Charts
                     </a>
                 </li>
-                <li class="sidebar-list-item">
-                    <a href="#" target="_blank">
+                <li class="sidebar-list-item" onclick="showTab('dataTableTab')">
+                    <a href="javascript:void(0)">
                         <span class="material-icons-outlined">table_chart</span> Data Table
                     </a>
                 </li>
             </ul>
+
+            <!-- Accordion Section -->
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-button">What is the System Usability Scale (SUS)?</button>
+                    <div class="accordion-content">
+                        <p>Coming Soon!</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-button">What is the "SUS Analysis Toolkit"?</button>
+                    <div class="accordion-content">
+                        <p>Coming Soon!</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-button">How can I use the "SUS Analysis Toolkit"?</button>
+                    <div class="accordion-content">
+                        <p>Coming Soon!</p>
+                    </div>
+                </div>
+            </div>
         </aside>
         <!-- End Sidebar -->
        
         <!-- Main Content -->
         <main class="main-container"> 
-            <div class="main-cards">
-                <div class="card">
-                    <div class="card-inner">
-                        <h3>UPLOAD CSV FILE</h3>
-                        <span class="material-icons-outlined">upload_file</span>
+            <div id="chartsTab" class="tab-content">
+                <div class="main-cards">
+                    <div class="card">
+                        <div class="card-inner">
+                            <h3>UPLOAD CSV FILE</h3>
+                            <span class="material-icons-outlined">upload_file</span>
+                        </div>
+                        <div id="drop-area">
+                            <p>Drag and Drop or <label for="fileInput" style="cursor:pointer; text-decoration:underline;">click here</label> to select the File</p>
+                            <input type="file" id="fileInput" accept=".csv" style="display: none;" />
+                            <div id="fileInfo" style="margin-top: 10px;"></div>
+                            <button id="removeFileButton" class="action-button" style="display: none;" onclick="removeFile()">Remove File</button>
+                        </div>
+                        <button id="processButton" class="action-button">Process File</button>
                     </div>
-                    <div id="drop-area">
-                        <p>Drag and Drop or <label for="fileInput" style="cursor:pointer; text-decoration:underline;">click here</label> to select the File</p>
-                        <input type="file" id="fileInput" accept=".csv" style="display: none;" />
-                        <div id="fileInfo" style="margin-top: 10px;"></div>
-                        <button id="removeFileButton" class="action-button" style="display: none;" onclick="removeFile()">Remove File</button>
+                    <div class="interpretation-panel">
+                        <h3>Interpretation</h3>
+                        <p>SUS Score:</p>
+                        <p>Median:</p>
+                        <p>Standard Deviation:</p>
+                        <p>Adjective Rating:</p>
+                        <p>Grade:</p>
+                        <p>Acceptability:</p>
                     </div>
-                    <button id="processButton" class="action-button">Process File</button>
                 </div>
-                <div class="interpretation-panel">
-                    <h3>Interpretation</h3>
-                    <p>SUS Score:</p>
-                    <p>Median:</p>
-                    <p>Standard Deviation:</p>
-                    <p>Adjective Rating:</p>
-                    <p>Grade:</p>
-                    <p>Acceptability:</p>
+
+                <!-- Overall Usability Summary -->
+                <div class="chart-section">
+                    <div class="charts-card">
+                        <h2 class="chart-title">Adjective Ratings</h2>
+                        <canvas id="doughnutChart"></canvas>
+                    </div>
+                    <div class="charts-card">
+                        <h2 class="chart-title">SUS Score Distribution</h2>
+                        <canvas id="histogramChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Detailed Usability Insights -->
+                <div class="chart-section">
+                    <div class="charts-card">
+                        <h2 class="chart-title">Individual SUS Scores</h2>
+                        <canvas id="barChart"></canvas>
+                    </div>
+                    <div class="charts-card">
+                        <h2 class="chart-title">Average Scores per Question</h2>
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- In-Depth Analysis -->
+                <div class="chart-section">
+                    <div class="charts-card">
+                        <h2 class="chart-title">Scores Across Questions</h2>
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                    <div class="charts-card">
+                        <h2 class="chart-title">Positive vs. Negative Questions</h2>
+                        <canvas id="groupedBarChart"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Overall Usability Summary -->
-            <div class="chart-section">
-                <div class="charts-card">
-                    <h2 class="chart-title">Adjective Ratings</h2>
-                    <canvas id="doughnutChart"></canvas>
-                </div>
-                <div class="charts-card">
-                    <h2 class="chart-title">SUS Score Distribution</h2>
-                    <canvas id="histogramChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Detailed Usability Insights -->
-            <div class="chart-section">
-                <div class="charts-card">
-                    <h2 class="chart-title">Individual SUS Scores</h2>
-                    <canvas id="barChart"></canvas>
-                </div>
-                <div class="charts-card">
-                    <h2 class="chart-title">Average Scores per Question</h2>
-                    <canvas id="radarChart"></canvas>
-                </div>
-            </div>
-
-            <!-- In-Depth Analysis -->
-            <div class="chart-section">
-                <div class="charts-card">
-                    <h2 class="chart-title">Scores Across Questions</h2>
-                    <canvas id="lineChart"></canvas>
-                </div>
-                <div class="charts-card">
-                    <h2 class="chart-title">Positive vs. Negative Questions</h2>
-                    <canvas id="groupedBarChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Data Table -->
-            <div id="tableContainer">
-                <h2>Data Table</                <div class="table-responsive">
-                    <table id="dataTable">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Q1</th>
-                                <th>Q2</th>
-                                <th>Q3</th>
-                                <th>Q4</th>
-                                <th>Q5</th>
-                                <th>Q6</th>
-                                <th>Q7</th>
-                                <th>Q8</th>
-                                <th>Q9</th>
-                                <th>Q10</th>
-                                <th>SUS Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data will be populated here -->
-                        </tbody>
-                    </table>
+            <div id="dataTableTab" class="tab-content" style="display: none;">
+                <!-- Data Table -->
+                <div id="tableContainer">
+                    <h2>Data Table</h2>
+                    <div class="table-responsive">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Q1</th>
+                                    <th>Q2</th>
+                                    <th>Q3</th>
+                                    <th>Q4</th>
+                                    <th>Q5</th>
+                                    <th>Q6</th>
+                                    <th>Q7</th>
+                                    <th>Q8</th>
+                                    <th>Q9</th>
+                                    <th>Q10</th>
+                                    <th>SUS Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="noDataMessage" style="display: none; text-align: center; margin-top: 20px;">No available data.</div>
                 </div>
             </div>
         </main>

@@ -8,13 +8,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dropArea = document.getElementById('drop-area');
     const fileInput = document.getElementById('fileInput');
+    const sidebar = document.getElementById('sidebar');
+    const menuIcon = document.querySelector('.menu-icon');
 
     document.getElementById('fileInput').addEventListener('change', handleFileUpload);
     document.getElementById('processButton').addEventListener('click', processFile);
     document.getElementById('removeFileButton').addEventListener('click', removeFile);
 
-    document.querySelector('.sidebar-list-item:nth-child(1)').addEventListener('click', () => showTab('chartsTab'));
-    document.querySelector('.sidebar-list-item:nth-child(2)').addEventListener('click', () => showTab('dataTableTab'));
+    document.querySelector('.sidebar-list-item:nth-child(1)').addEventListener('click', () => {
+        showTab('chartsTab');
+        closeSidebarOnMobile();
+    });
+    document.querySelector('.sidebar-list-item:nth-child(2)').addEventListener('click', () => {
+        showTab('dataTableTab');
+        closeSidebarOnMobile();
+    });
+
+    menuIcon.addEventListener('click', toggleSidebar);
 
     let uploadedFile = null;
 
@@ -526,6 +536,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('fileInfo').textContent = ""; // Clear file info
         document.getElementById('removeFileButton').style.display = 'none'; // Hide remove button
         uploadedFile = null; // Reset the uploadedFile variable
+    }
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('sidebar-closed');
+    }
+
+    function closeSidebarOnMobile() {
+        if (window.innerWidth <= 992) {
+            sidebar.classList.add('sidebar-closed');
+        }
     }
 
     function showTab(tabId) {

@@ -40,6 +40,7 @@ body {
 
 .menu-icon {
     display: none;
+    cursor: pointer;
 }
 
 /* ---------- SIDEBAR ---------- */
@@ -74,7 +75,6 @@ body {
     margin-top: 15px;
     font-size: 20px;
     font-weight: 700;
-    color: #ffffff; /* white */
 }
 
 .sidebar-list {
@@ -194,19 +194,6 @@ body {
     flex-wrap: wrap;
     gap: 20px;
 }
-
-#drop-area {
-    border: 2px dashed #ccc;
-    padding: 20px;
-    text-align: center;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-}
-
-#drop-area.highlight {
-    border-color: #6c757d; /* Changing border color when dragging over */
-}
-
 
 .charts-card {
     flex: 1 1 calc(50% - 20px);
@@ -340,6 +327,7 @@ th, td {
         transform: translateX(-100%);
         position: fixed;
         z-index: 1000;
+        width: 260px; /* Ensure sidebar width is fixed */
     }
 
     .menu-icon {

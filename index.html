@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="Constyles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.0"></script>
 </head>
 <body>
     <div class="grid-container">
@@ -52,41 +53,44 @@
                 <div class="accordion-item">
                     <button class="accordion-button">What is the System Usability Scale (SUS)?</button>
                     <div class="accordion-content">
-                        <p>Coming Soon!</p>
+                        <p>Coming Soon! Once agreed with my supervisor</p>
                     </div>
                 </div>
                 <div class="accordion-item">
                     <button class="accordion-button">What is the "SUS Analysis Toolkit"?</button>
                     <div class="accordion-content">
-                        <p>Coming Soon!</p>
+                        <p>Coming Soon! Once agreed with my supervisor</p>
                     </div>
                 </div>
                 <div class="accordion-item">
                     <button class="accordion-button">How can I use the "SUS Analysis Toolkit"?</button>
                     <div class="accordion-content">
-                        <p>Coming Soon!</p>
+                        <p>Coming Soon! Once agreed with my supervisor</p>
                     </div>
                 </div>
             </div>
         </aside>
         <!-- End Sidebar -->
-       
+
         <!-- Main Content -->
-        <main class="main-container"> 
+        <main class="main-container">
             <div id="chartsTab" class="tab-content">
                 <div class="main-cards">
                     <div class="card">
                         <div class="card-inner">
-                            <h3>UPLOAD CSV FILE</h3>
                             <span class="material-icons-outlined">upload_file</span>
+                            <h3>UPLOAD CSV FILE</h3>
                         </div>
                         <div id="drop-area">
                             <p>Drag and Drop or <label for="fileInput" style="cursor:pointer; text-decoration:underline;">click here</label> to select the File</p>
                             <input type="file" id="fileInput" accept=".csv" style="display: none;" />
                             <div id="fileInfo" style="margin-top: 10px;"></div>
-                            <button id="removeFileButton" class="action-button" style="display: none;" onclick="removeFile()">Remove File</button>
                         </div>
-                        <button id="processButton" class="action-button">Process File</button>
+                        <div class="button-container">
+                            <button id="processButton" class="action-button">Process File</button>
+                            <button id="resetButton" class="action-button">Reset Charts</button>
+                            <button id="removeFileButton" class="action-button" style="display: none;">Remove File</button>
+                        </div>
                     </div>
                     <div class="interpretation-panel">
                         <h3>Interpretation</h3>
@@ -102,36 +106,42 @@
                 <!-- Overall Usability Summary -->
                 <div class="chart-section">
                     <div class="charts-card">
-                        <h2 class="chart-title">Adjective Ratings</h2>
-                        <canvas id="doughnutChart"></canvas>
+                        <h2 class="chart-title">Individual SUS Scores</h2>
+                        <canvas id="barChart"></canvas>
+                        <button id="downloadBarChartBtn" class="download-btn">Download</button>
                     </div>
                     <div class="charts-card">
                         <h2 class="chart-title">SUS Score Distribution</h2>
                         <canvas id="histogramChart"></canvas>
+                        <button id="downloadHistogramChartBtn" class="download-btn">Download</button>
                     </div>
                 </div>
 
                 <!-- Detailed Usability Insights -->
                 <div class="chart-section">
                     <div class="charts-card">
-                        <h2 class="chart-title">Individual SUS Scores</h2>
-                        <canvas id="barChart"></canvas>
+                        <h2 class="chart-title">Adjective Ratings</h2>
+                        <canvas id="doughnutChart"></canvas>
+                        <button id="downloadDoughnutChartBtn" class="download-btn">Download</button>
                     </div>
                     <div class="charts-card">
-                        <h2 class="chart-title">Average Scores per Question</h2>
-                        <canvas id="radarChart"></canvas>
+                        <h2 class="chart-title">Scores Across Questions</h2>
+                        <canvas id="lineChart"></canvas>
+                        <button id="downloadLineChartBtn" class="download-btn">Download</button>
                     </div>
                 </div>
 
                 <!-- In-Depth Analysis -->
                 <div class="chart-section">
                     <div class="charts-card">
-                        <h2 class="chart-title">Scores Across Questions</h2>
-                        <canvas id="lineChart"></canvas>
+                        <h2 class="chart-title">Average Scores per Question</h2>
+                        <canvas id="radarChart"></canvas>
+                        <button id="downloadRadarChartBtn" class="download-btn">Download</button>
                     </div>
                     <div class="charts-card">
                         <h2 class="chart-title">Positive vs. Negative Questions</h2>
                         <canvas id="groupedBarChart"></canvas>
+                        <button id="downloadGroupedBarChartBtn" class="download-btn">Download</button>
                     </div>
                 </div>
             </div>
@@ -140,6 +150,7 @@
                 <!-- Data Table -->
                 <div id="tableContainer">
                     <h2>Data Table</h2>
+                    <button id="downloadCsvBtn" class="download-btn">Download CSV</button>
                     <div class="table-responsive">
                         <table id="dataTable">
                             <thead>

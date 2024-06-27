@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const radarChartCtx = document.getElementById('radarChart').getContext('2d');
     const barChartCtx = document.getElementById('barChart').getContext('2d');
     const lineChartCtx = document.getElementById('lineChart').getContext('2d');
-    const doughnutChartCtx = document.getElementById('doughnutChart').getContext('2d');
+    const susChartCtx = document.getElementById('doughnutChart').getContext('2d');
     const histogramChartCtx = document.getElementById('histogramChart').getContext('2d');
     const groupedBarChartCtx = document.getElementById('groupedBarChart').getContext('2d');
 
@@ -12,11 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fileInput').addEventListener('change', handleFileUpload);
     document.getElementById('processButton').addEventListener('click', processFile);
     document.getElementById('removeFileButton').addEventListener('click', removeFile);
+    document.getElementById('resetButton').addEventListener('click', resetCharts);  // Add reset button event listener
 
     document.querySelector('.sidebar-list-item:nth-child(1)').addEventListener('click', () => showTab('chartsTab'));
     document.querySelector('.sidebar-list-item:nth-child(2)').addEventListener('click', () => showTab('dataTableTab'));
 
     let uploadedFile = null;
+    let data = [];
+    let convertedData = [];
+    let susScores = [];
+    let barChart, radarChart, lineChart, susChart, histogramChart, groupedBarChart;
 
     // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -92,21 +97,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                const data = results.data;
+                data = results.data;
                 if (!data || data.length === 0) {
                     alert("CSV file is empty or not properly formatted.");
                     return;
                 }
 
-                const scores = calculateSUSScores(data);
-                if (!scores) {
+                convertedData = data.map(item => convertToAdjustedData(item));
+                susScores = calculateSUSScores(convertedData);
+                if (!susScores) {
                     alert("Error calculating SUS scores. Please check the data format.");
                     return;
                 }
 
-                updateDataTable(data, scores);
-                renderCharts(data, scores);
-                updateInterpretation(scores);
+                updateDataTable(convertedData, susScores);
+                renderCharts(convertedData, susScores);
+                updateInterpretation(susScores);
                 showTab('chartsTab');  // Show the charts tab after processing by default
             },
             error: function(error) {
@@ -116,18 +122,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function convertToAdjustedData(item) {
+        return {
+            Q1: item.Q1 - 1,
+            Q2: 5 - item.Q2,
+            Q3: item.Q3 - 1,
+            Q4: 5 - item.Q4,
+            Q5: item.Q5 - 1,
+            Q6: 5 - item.Q6,
+            Q7: item.Q7 - 1,
+            Q8: 5 - item.Q8,
+            Q9: item.Q9 - 1,
+            Q10: 5 - item.Q10
+        };
+    }
+
     function calculateSUSScores(data) {
         try {
             return data.map(item => {
-                if (typeof item.Q1 !== 'number' || typeof item.Q2 !== 'number' || typeof item.Q3 !== 'number' ||
-                    typeof item.Q4 !== 'number' || typeof item.Q5 !== 'number' || typeof item.Q6 !== 'number' ||
-                    typeof item.Q7 !== 'number' || typeof item.Q8 !== 'number' || typeof item.Q9 !== 'number' ||
-                    typeof item.Q10 !== 'number') {
-                    throw new Error("Invalid data format");
-                }
-
-                const positiveScores = (item.Q1 - 1) + (item.Q3 - 1) + (item.Q5 - 1) + (item.Q7 - 1) + (item.Q9 - 1);
-                const negativeScores = (5 - item.Q2) + (5 - item.Q4) + (5 - item.Q6) + (5 - item.Q8) + (5 - item.Q10);
+                const positiveScores = (item.Q1) + (item.Q3) + (item.Q5) + (item.Q7) + (item.Q9);
+                const negativeScores = (item.Q2) + (item.Q4) + (item.Q6) + (item.Q8) + (item.Q10);
                 return (positiveScores + negativeScores) * 2.5;
             });
         } catch (error) {
@@ -150,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (let i = 1; i <= 10; i++) {
                 const cell = document.createElement('td');
-                cell.textContent = row[`Q${i}`];
+                cell.textContent = row[`Q${i}`].toFixed(2);
                 tr.appendChild(cell);
             }
 
@@ -175,10 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
         tr.appendChild(avgCell);
 
         for (let i = 1; i <= 10; i++) {
-            const avgScore = average(data.map(item => item[`Q${i}`]));
-            const cell = document.createElement('td');
-            cell.textContent = avgScore.toFixed(2);
-            tr.appendChild(cell);
+            const avgConvertedScore = average(data.map(item => item[`Q${i}`]));
+            const convertedCell = document.createElement('td');
+            convertedCell.textContent = avgConvertedScore.toFixed(2);
+            tr.appendChild(convertedCell);
         }
 
         const avgSUSScore = average(scores);
@@ -190,26 +204,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCharts(data, scores) {
-        renderBarChart(scores);
-        renderRadarChart(data);
-        renderLineChart(data);
-        renderDoughnutChart(scores);
-        renderHistogram(scores);
-        renderGroupedBarChart(data);
+        if (barChart) barChart.destroy();
+        if (radarChart) radarChart.destroy();
+        if (lineChart) lineChart.destroy();
+        if (susChart) susChart.destroy();
+        if (histogramChart) histogramChart.destroy();
+        if (groupedBarChart) groupedBarChart.destroy();
+
+        barChart = renderBarChart(scores, data);
+        radarChart = renderRadarChart(data);
+        lineChart = renderLineChart(data);
+        susChart = renderSusChart(scores);
+        histogramChart = renderHistogram(scores);
+        groupedBarChart = renderGroupedBarChart(data);
     }
 
-    function renderBarChart(scores) {
-        new Chart(barChartCtx, {
+    function renderBarChart(scores, data) {
+        // Calculate the average scores per user
+        const averageScores = data.map(user => {
+            const questionScores = Object.values(user).map(val => val * 2.5);
+            return average(questionScores);
+        });
+
+        return new Chart(barChartCtx, {
             type: 'bar',
             data: {
                 labels: scores.map((_, index) => `User ${index + 1}`),
-                datasets: [{
-                    label: 'SUS Score',
-                    data: scores,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
+                datasets: [
+                    {
+                        label: 'SUS Score',
+                        data: scores,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Average Score',
+                        data: averageScores,
+                        type: 'line',
+                        fill: false,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        tension: 0.1,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        showLine: true,
+                        borderWidth: 2
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -220,13 +263,73 @@ document.addEventListener('DOMContentLoaded', () => {
                         title: {
                             display: true,
                             text: 'SUS Score'
+                        },
+                        grid: {
+                            color: 'rgba(75, 192, 192, 0.2)',
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(0);
+                            }
                         }
                     },
                     x: {
                         title: {
                             display: true,
                             text: 'User'
+                        },
+                        grid: {
+                            color: 'rgba(75, 192, 192, 0.2)',
                         }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => {
+                                if (tooltipItem.datasetIndex === 1) {
+                                    return `Average Score: ${tooltipItem.raw.toFixed(2)}`;
+                                }
+                                return `SUS Score: ${tooltipItem.raw.toFixed(2)}`;
+                            }
+                        }
+                    },
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                yMin: 50,
+                                yMax: 50,
+                                borderColor: 'rgba(255, 165, 0, 0.8)',
+                                borderWidth: 2,
+                                label: {
+                                    content: 'Marginal Acceptability',
+                                    enabled: true,
+                                    position: 'center'
+                                }
+                            },
+                            line2: {
+                                type: 'line',
+                                yMin: 70,
+                                yMax: 70,
+                                borderColor: 'rgba(60, 179, 113, 0.8)',
+                                borderWidth: 2,
+                                label: {
+                                    content: 'Acceptability Threshold',
+                                    enabled: true,
+                                    position: 'center'
+                                }
+                            }
+                        }
+                    }
+                },
+                onClick: (e) => {
+                    const activePoints = barChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+                    if (activePoints.length > 0) {
+                        const index = activePoints[0].index;
+                        const userScore = scores[index];
+                        alert(`User ${index + 1} SUS Score: ${userScore.toFixed(2)}\nAverage Score: ${averageScores[index].toFixed(2)}`);
+                        filterDataByUser(index + 1);
                     }
                 }
             }
@@ -247,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Q10: average(data.map(item => item.Q10))
         };
 
-        new Chart(radarChartCtx, {
+        return new Chart(radarChartCtx, {
             type: 'radar',
             data: {
                 labels: Object.keys(averageScores),
@@ -295,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tension: 0.1
         }));
 
-        new Chart(lineChartCtx, {
+        return new Chart(lineChartCtx, {
             type: 'line',
             data: {
                 labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'],
@@ -322,35 +425,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function renderDoughnutChart(scores) {
-        const adjectiveRatings = scores.map(score => calculateAdjectiveRating(score));
-        const ratingCounts = {
-            Excellent: adjectiveRatings.filter(r => r === 'Excellent').length,
-            Good: adjectiveRatings.filter(r => r === 'Good').length,
-            OK: adjectiveRatings.filter(r => r === 'OK').length,
-            Poor: adjectiveRatings.filter(r => r === 'Poor').length,
-            Awful: adjectiveRatings.filter(r => r === 'Awful').length
-        };
+    function renderSusChart(scores) {
+        const susScoreRanges = ['Worst Imaginable', 'Poor', 'OK', 'Good', 'Excellent', 'Best Imaginable'];
+        const susScoresCount = [0, 0, 0, 0, 0, 0];
 
-        new Chart(doughnutChartCtx, {
-            type: 'doughnut',
+        scores.forEach(score => {
+            if (score < 25) susScoresCount[0]++;
+            else if (score < 50) susScoresCount[1]++;
+            else if (score < 70) susScoresCount[2]++;
+            else if (score < 85) susScoresCount[3]++;
+            else if (score < 100) susScoresCount[4]++;
+            else susScoresCount[5]++;
+        });
+
+        return new Chart(susChartCtx, {
+            type: 'bar',
             data: {
-                labels: Object.keys(ratingCounts),
+                labels: susScoreRanges,
                 datasets: [{
-                    label: 'Adjective Ratings',
-                    data: Object.values(ratingCounts),
+                    label: 'Number of Scores',
+                    data: susScoresCount,
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(255, 205, 86, 0.2)',
                         'rgba(75, 192, 192, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
                         'rgba(153, 102, 255, 0.2)'
                     ],
                     borderColor: [
                         'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(255, 205, 86, 1)',
                         'rgba(75, 192, 192, 1)',
+                        'rgba(54, 162, 235, 1)',
                         'rgba(153, 102, 255, 1)'
                     ],
                     borderWidth: 1
@@ -359,15 +467,18 @@ document.addEventListener('DOMContentLoaded', () => {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top'
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Scores'
+                        }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return `${tooltipItem.label}: ${tooltipItem.raw}`;
-                            }
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'SUS Score Range'
                         }
                     }
                 }
@@ -379,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bins = Array.from({ length: 11 }, (_, i) => i * 10);
         const histogramData = bins.map(bin => scores.filter(score => score >= bin && score < bin + 10).length);
 
-        new Chart(histogramChartCtx, {
+        return new Chart(histogramChartCtx, {
             type: 'bar',
             data: {
                 labels: bins.map(bin => `${bin}-${bin + 9}`),
@@ -420,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const positiveScores = positiveQuestions.map(q => average(data.map(item => item[q])));
         const negativeScores = negativeQuestions.map(q => average(data.map(item => item[q])));
 
-        new Chart(groupedBarChartCtx, {
+        return new Chart(groupedBarChartCtx, {
             type: 'bar',
             data: {
                 labels: positiveQuestions.concat(negativeQuestions),
@@ -574,4 +685,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show the charts tab by default
     showTab('chartsTab');
+
+    // Download functionality for charts
+    document.getElementById('downloadBarChartBtn').addEventListener('click', () => downloadChart('barChart', 'IndividualSUSScores.png'));
+    document.getElementById('downloadRadarChartBtn').addEventListener('click', () => downloadChart('radarChart', 'AverageScoresPerQuestion.png'));
+    document.getElementById('downloadLineChartBtn').addEventListener('click', () => downloadChart('lineChart', 'ScoresAcrossQuestions.png'));
+    document.getElementById('downloadDoughnutChartBtn').addEventListener('click', () => downloadChart('doughnutChart', 'SUSScoring.png'));
+    document.getElementById('downloadHistogramChartBtn').addEventListener('click', () => downloadChart('histogramChart', 'SUSScoreDistribution.png'));
+    document.getElementById('downloadGroupedBarChartBtn').addEventListener('click', () => downloadChart('groupedBarChart', 'PositiveVsNegativeQuestions.png'));
+    document.getElementById('downloadCsvBtn').addEventListener('click', downloadCSV);
+
+    function downloadChart(chartId, filename) {
+        const link = document.createElement('a');
+        link.href = document.getElementById(chartId).toDataURL('image/png');
+        link.download = filename;
+        link.click();
+    }
+
+    function downloadCSV() {
+        const rows = document.querySelectorAll('#dataTable tr');
+        let csvContent = '';
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td, th');
+            const rowContent = Array.from(cols).map(col => col.textContent).join(',');
+            csvContent += rowContent + '\n';
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'SUS_Data.csv';
+        link.click();
+    }
+
+    // Filtering functions
+    function filterDataByUser(userIndex) {
+        const filteredData = data.filter((_, index) => index === userIndex - 1);
+        const filteredScores = susScores.filter((_, index) => index === userIndex - 1);
+        renderCharts(filteredData, filteredScores);
+    }
+
+    function filterDataByRating(rating) {
+        const filteredData = data.filter((_, index) => calculateAdjectiveRating(susScores[index]) === rating);
+        const filteredScores = susScores.filter(score => calculateAdjectiveRating(score) === rating);
+        renderCharts(filteredData, filteredScores);
+    }
+
+    // Reset charts to show all data
+    function resetCharts() {
+        renderCharts(convertedData, susScores);
+    }
 });

@@ -109,14 +109,19 @@ body {
 /* ---------- INTERPRETATION PANEL ---------- */
 .interpretation-panel {
     background-color: #d0e1f9; /* Slightly different blue to differentiate */
-    padding: 1.5rem;
+    padding: 1rem; /* Reduced padding */
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Align content to the top */
     border-radius: 0.3125rem;
     transition: background-color 0.3s ease;
     box-shadow: 0 6px 7px -3px rgba(0, 0, 0, 0.2); /* Add some shadow for better visual separation */
+}
+
+.interpretation-panel p {
+    margin: 0;
+    padding: 0.5rem 0; /* Reduced padding */
 }
 
 /* ---------- MAIN ---------- */
@@ -149,24 +154,36 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 1.5rem;
+    padding: 1rem; /* Reduced padding */
     border-radius: 0.3125rem;
     transition: background-color 0.3s ease;
     background-color: #a1b3d1; /* Light Blue */
     box-shadow: 0 6px 7px -3px rgba(0, 0, 0, 0.2); /* Add some shadow for better visual separation */
 }
 
-.card-inner, .interpretation-panel > * {
-    margin: 0;
-    padding: 10px 0;
+.card-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icon and text */
 }
 
-/* Ensure buttons are properly aligned within the card */
-.action-button {
-    margin-top: 1.25rem; /* Convert 20px to rem for consistency */
+.card-inner h3 {
+    margin: 0; /* Remove margin for better alignment */
 }
 
-/* Hover effect for action buttons */
+.card-inner span {
+    font-size: 1.5rem; /* Adjust icon size */
+}
+
+/* Container for buttons */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+    margin-top: 20px; /* Space between the drop area and buttons */
+}
+
+/* Button styles */
 .action-button {
     background-color: #1b365c; /* Default background color */
     color: #ffffff; /* Default text color */
@@ -321,6 +338,23 @@ th, td {
 
 #drop-area.highlight {
     border-color: #6c757d; /* Change border color when dragging over */
+}
+
+/* Download Button Styles */
+.download-btn {
+    background-color: #1b365c; /* Match the action-button background color */
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px; /* Add some spacing above the button */
+    align-self: center; /* Center the button horizontally */
+    transition: background-color 0.3s ease;
+}
+
+.download-btn:hover {
+    background-color: #16355c; /* Darker blue on hover */
 }
 
 /* ---------- MEDIA QUERIES ---------- */

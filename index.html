@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="Constyles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="grid-container">
@@ -51,23 +54,84 @@
             <!-- Accordion Section -->
             <div class="accordion">
                 <div class="accordion-item">
-                    <button class="accordion-button">What is the System Usability Scale (SUS)?</button>
+                    <button class="accordion-button">
+                        <div class="left-content"> 
+                        <i class="fas fa-globe"></i> System Usability Score</button>
                     <div class="accordion-content">
-                        <p>Coming Soon! Once agreed with my supervisor</p>
+                        <p>The System Usability Scale (SUS) provides a reliable tool for measuring usability. It consists of a 10-item questionnaire with five response options for respondents; from Strongly agree to Strongly disagree. The SUS score is then calculated by converting the raw scores to a 0-100 scale.</p>
+                        <a href="https://measuringu.com/sus/" target="_blank">Please read more</a>
                     </div>
                 </div>
                 <div class="accordion-item">
-                    <button class="accordion-button">What is the "SUS Analysis Toolkit"?</button>
+                    <button class="accordion-button">
+                        <div class="left-content"> 
+                        <i class="fas fa-book"></i> Median</button>
                     <div class="accordion-content">
-                        <p>Coming Soon! Once agreed with my supervisor</p>
+                        <p>The median is a measure of central tendency that represents the middle value in a data set when it is ordered from least to greatest. In the context of SUS scores, the median helps identify the central score in a sample, providing insight into the typical user experience.</p>
+                        <a href="https://www.tandfonline.com/doi/full/10.1080/10447318.2018.1455307" target="_blank">Please read more</a>
                     </div>
                 </div>
                 <div class="accordion-item">
-                    <button class="accordion-button">How can I use the "SUS Analysis Toolkit"?</button>
+                    <button class="accordion-button">
+                        <div class="left-content"> 
+                        <i class="fas fa-book"></i> Standard Deviation</button>
                     <div class="accordion-content">
-                        <p>Coming Soon! Once agreed with my supervisor</p>
+                        <p>Standard deviation measures the amount of variation or dispersion in a set of values. A low standard deviation indicates that the values tend to be close to the mean, whereas a high standard deviation indicates that the values are spread out over a wider range. For SUS scores, it helps assess the consistency of user responses.</p>
+                        <a href="https://www.tandfonline.com/doi/full/10.1080/10447318.2020.1870831" target="_blank">Please read more</a>
                     </div>
                 </div>
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <div class="left-content"> 
+                        <i class="fas fa-book"></i> Adjective Rating</button>
+                    <div class="accordion-content">
+                        <p>Adjective ratings provide a qualitative measure that describes the usability of a system in terms of user satisfaction. Common adjectives used include "Excellent," "Good," "Fair," "Poor," and "Awful." These ratings help to contextualize SUS scores in a way that is easily understandable.</p>
+                        <a href="https://uxpajournal.org/wp-content/uploads/sites/7/pdf/JUS_Bangor_May2009.pdf" target="_blank">Please read more</a>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <div class="left-content"> 
+                        <i class="fas fa-globe"></i> Grade</button>
+                    <div class="accordion-content">
+                        <p>SUS scores can be converted into letter grades (A to F) to provide a more intuitive understanding of the results. This conversion is based on the percentile ranks of SUS scores. For example, scores above 85 are considered "A" grade, indicating excellent usability.</p>
+                        <a href="https://measuringu.com/sus/" target="_blank">Please read more</a>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <div class="left-content"> 
+                        <i class="fas fa-book"></i> Acceptability</button>
+                    <div class="accordion-content">
+                        <p>Acceptability refers to the degree to which users find a system to be usable and satisfactory. SUS scores are often categorized into levels of acceptability, such as "Not Acceptable," "Marginally Acceptable," and "Acceptable," helping to quickly assess whether a system meets user expectations.</p>
+                        <a href="https://www.tandfonline.com/doi/full/10.1080/10447310802205776" target="_blank">Please read more</a>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <div class="left-content"> 
+                        <i class="fas fa-globe"></i> Other Sources</button>
+                    <div class="accordion-content">
+                        <p>I will add necessary Link in here at the later stage</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Generation Section -->
+            <div class="report-generation">
+                <h2>Generate Report</h2>
+                <form id="reportForm" onsubmit="generateReport(event)">
+                    <label>
+                        <input type="checkbox" name="include_summary" checked> Include Summary Statistics
+                    </label><br>
+                    <label>
+                        <input type="checkbox" name="include_median" checked> Include Median Scores
+                    </label><br>
+                    <label>
+                        <input type="checkbox" name="include_visualizations" checked> Include Visualisations
+                    </label><br>
+                    <button type="submit" id="generateReportButton">Generate and Download Report</button>
+                </form>
             </div>
         </aside>
         <!-- End Sidebar -->
@@ -107,41 +171,59 @@
                 <div class="chart-section">
                     <div class="charts-card">
                         <h2 class="chart-title">Individual SUS Scores</h2>
+                        <div class="chart-actions">
+                            <button id="downloadBarChartBtn" class="icon-btn"><i class="fas fa-download"></i></button>
+                            <button id="resetBarChartBtn" class="icon-btn"><i class="fas fa-redo"></i></button>
+                        </div>
                         <canvas id="barChart"></canvas>
-                        <button id="downloadBarChartBtn" class="download-btn">Download</button>
                     </div>
                     <div class="charts-card">
                         <h2 class="chart-title">SUS Score Distribution</h2>
+                        <div class="chart-actions">
+                            <button id="downloadHistogramChartBtn" class="icon-btn"><i class="fas fa-download"></i></button>
+                            <button id="resetHistogramChartBtn" class="icon-btn"><i class="fas fa-redo"></i></button>
+                        </div>
                         <canvas id="histogramChart"></canvas>
-                        <button id="downloadHistogramChartBtn" class="download-btn">Download</button>
                     </div>
                 </div>
 
                 <!-- Detailed Usability Insights -->
                 <div class="chart-section">
                     <div class="charts-card">
-                        <h2 class="chart-title">Adjective Ratings</h2>
-                        <canvas id="doughnutChart"></canvas>
-                        <button id="downloadDoughnutChartBtn" class="download-btn">Download</button>
+                        <h2 class="chart-title">SUS Score</h2>
+                        <div class="chart-actions">
+                            <button id="downloadBoxPlotChartBtn" class="icon-btn"><i class="fas fa-download"></i></button>
+                            <button id="resetBoxPlotChartBtn" class="icon-btn"><i class="fas fa-redo"></i></button>
+                        </div>
+                        <canvas id="boxPlotChart" width="400" height="600"></canvas>
                     </div>
                     <div class="charts-card">
                         <h2 class="chart-title">Scores Across Questions</h2>
+                        <div class="chart-actions">
+                            <button id="downloadLineChartBtn" class="icon-btn"><i class="fas fa-download"></i></button>
+                            <button id="resetLineChartBtn" class="icon-btn"><i class="fas fa-redo"></i></button>
+                        </div>
                         <canvas id="lineChart"></canvas>
-                        <button id="downloadLineChartBtn" class="download-btn">Download</button>
                     </div>
                 </div>
 
                 <!-- In-Depth Analysis -->
                 <div class="chart-section">
                     <div class="charts-card">
-                        <h2 class="chart-title">Average Scores per Question</h2>
+                        <h2 class="chart-title">Median and Mode</h2>
+                        <div class="chart-actions">
+                            <button id="downloadRadarChartBtn" class="icon-btn"><i class="fas fa-download"></i></button>
+                            <button id="resetRadarChartBtn" class="icon-btn"><i class="fas fa-redo"></i></button>
+                        </div>
                         <canvas id="radarChart"></canvas>
-                        <button id="downloadRadarChartBtn" class="download-btn">Download</button>
                     </div>
                     <div class="charts-card">
                         <h2 class="chart-title">Positive vs. Negative Questions</h2>
+                        <div class="chart-actions">
+                            <button id="downloadGroupedBarChartBtn" class="icon-btn"><i class="fas fa-download"></i></button>
+                            <button id="resetGroupedBarChartBtn" class="icon-btn"><i class="fas fa-redo"></i></button>
+                        </div>
                         <canvas id="groupedBarChart"></canvas>
-                        <button id="downloadGroupedBarChartBtn" class="download-btn">Download</button>
                     </div>
                 </div>
             </div>
@@ -150,7 +232,7 @@
                 <!-- Data Table -->
                 <div id="tableContainer">
                     <h2>Data Table</h2>
-                    <button id="downloadCsvBtn" class="download-btn">Download CSV</button>
+                    <button id="downloadCsvBtn" class="icon-btn"><i class="fas fa-download"></i></button>
                     <div class="table-responsive">
                         <table id="dataTable">
                             <thead>

@@ -1,45 +1,70 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const radarChartCtx = document.getElementById('radarChart').getContext('2d');
-    const barChartCtx = document.getElementById('barChart').getContext('2d');
-    const lineChartCtx = document.getElementById('lineChart').getContext('2d');
-    const susChartCtx = document.getElementById('doughnutChart').getContext('2d');
-    const histogramChartCtx = document.getElementById('histogramChart').getContext('2d');
-    const groupedBarChartCtx = document.getElementById('groupedBarChart').getContext('2d');
+    const chartElements = {
+        radarChartCtx: document.getElementById('radarChart').getContext('2d'),
+        barChartCtx: document.getElementById('barChart').getContext('2d'),
+        lineChartCtx: document.getElementById('lineChart').getContext('2d'),
+        boxPlotChartCtx: document.getElementById('boxPlotChart').getContext('2d'),
+        histogramChartCtx: document.getElementById('histogramChart').getContext('2d'),
+        groupedBarChartCtx: document.getElementById('groupedBarChart').getContext('2d')
+    };
 
-    const dropArea = document.getElementById('drop-area');
     const fileInput = document.getElementById('fileInput');
-
-    document.getElementById('fileInput').addEventListener('change', handleFileUpload);
-    document.getElementById('processButton').addEventListener('click', processFile);
-    document.getElementById('removeFileButton').addEventListener('click', removeFile);
-    document.getElementById('resetButton').addEventListener('click', resetCharts);  // Add reset button event listener
-
-    document.querySelector('.sidebar-list-item:nth-child(1)').addEventListener('click', () => showTab('chartsTab'));
-    document.querySelector('.sidebar-list-item:nth-child(2)').addEventListener('click', () => showTab('dataTableTab'));
+    const dropArea = document.getElementById('drop-area');
 
     let uploadedFile = null;
     let data = [];
     let convertedData = [];
     let susScores = [];
-    let barChart, radarChart, lineChart, susChart, histogramChart, groupedBarChart;
+    let charts = {};
 
-    // Prevent default drag behaviors
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false)
-        document.body.addEventListener(eventName, preventDefaults, false)
-    });
+    // Event Listeners
+    fileInput.addEventListener('change', handleFileUpload);
+    document.getElementById('processButton').addEventListener('click', processFile);
+    document.getElementById('removeFileButton').addEventListener('click', removeFile);
+    document.getElementById('resetButton').addEventListener('click', resetCharts);
+    document.getElementById('reportForm').addEventListener('submit', generateReport);
 
-    // Highlight drop area when item is dragged over it
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
-    });
+    setupSidebarListeners();
+    setupDragAndDrop();
+    setupAccordion();
 
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
-    });
+    function setupSidebarListeners() {
+        document.querySelector('.sidebar-list-item:nth-child(1)').addEventListener('click', () => showTab('chartsTab'));
+        document.querySelector('.sidebar-list-item:nth-child(2)').addEventListener('click', () => showTab('dataTableTab'));
+    }
 
-    // Handle dropped files
-    dropArea.addEventListener('drop', handleDrop, false);
+    function setupDragAndDrop() {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+        });
+
+        dropArea.addEventListener('drop', handleDrop, false);
+    }
+
+    function setupAccordion() {
+        document.querySelectorAll('.accordion-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const isActive = button.classList.contains('active');
+                document.querySelectorAll('.accordion-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.accordion-content').forEach(content => content.style.display = 'none');
+
+                if (!isActive) {
+                    button.classList.add('active');
+                    const content = button.nextElementSibling;
+                    content.style.display = "block";
+                }
+            });
+        });
+    }
 
     function preventDefaults(e) {
         e.preventDefault();
@@ -47,10 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-
-        handleFiles(files);
+        handleFiles(e.dataTransfer.files);
     }
 
     function handleFiles(files) {
@@ -61,9 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('fileInfo').textContent = `File: ${file.name}`;
                 document.getElementById('removeFileButton').style.display = 'block';
             } else {
-                document.getElementById('fileInfo').textContent = "Please select a valid CSV file.";
-                document.getElementById('removeFileButton').style.display = 'none';
-                uploadedFile = null;
+                displayInvalidFileMessage();
             }
         }
     }
@@ -75,10 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fileInfo').textContent = `File: ${file.name}`;
             document.getElementById('removeFileButton').style.display = 'block';
         } else {
-            document.getElementById('fileInfo').textContent = "Please select a valid CSV file.";
-            document.getElementById('removeFileButton').style.display = 'none';
-            uploadedFile = null;
+            displayInvalidFileMessage();
         }
+    }
+
+    function displayInvalidFileMessage() {
+        document.getElementById('fileInfo').textContent = "Please select a valid CSV file.";
+        document.getElementById('removeFileButton').style.display = 'none';
+        uploadedFile = null;
     }
 
     function processFile() {
@@ -103,17 +127,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                convertedData = data.map(item => convertToAdjustedData(item));
+                convertedData = data.map(convertToAdjustedData);
                 susScores = calculateSUSScores(convertedData);
                 if (!susScores) {
                     alert("Error calculating SUS scores. Please check the data format.");
                     return;
                 }
 
+                console.log('Converted Data:', convertedData);
+                console.log('SUS Scores:', susScores);
+
                 updateDataTable(convertedData, susScores);
                 renderCharts(convertedData, susScores);
                 updateInterpretation(susScores);
-                showTab('chartsTab');  // Show the charts tab after processing by default
+                showTab('chartsTab');
             },
             error: function(error) {
                 console.error("Error parsing file:", error);
@@ -151,11 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDataTable(data, scores) {
-        console.log("Updating data table with the following data:", data);
-        console.log("SUS scores:", scores);
-
         const tbody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-        tbody.innerHTML = ""; // Clear existing data
+        tbody.innerHTML = "";
         data.forEach((row, index) => {
             const tr = document.createElement('tr');
             const userCell = document.createElement('td');
@@ -175,9 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.appendChild(tr);
         });
 
-        // Calculate and add the average row
         addAverageRow(data, scores);
-
         checkTableData();
     }
 
@@ -204,29 +226,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCharts(data, scores) {
-        if (barChart) barChart.destroy();
-        if (radarChart) radarChart.destroy();
-        if (lineChart) lineChart.destroy();
-        if (susChart) susChart.destroy();
-        if (histogramChart) histogramChart.destroy();
-        if (groupedBarChart) groupedBarChart.destroy();
+        // Destroy existing charts if any
+        Object.values(charts).forEach(chart => chart.destroy());
 
-        barChart = renderBarChart(scores, data);
-        radarChart = renderRadarChart(data);
-        lineChart = renderLineChart(data);
-        susChart = renderSusChart(scores);
-        histogramChart = renderHistogram(scores);
-        groupedBarChart = renderGroupedBarChart(data);
+        // Render charts
+        charts.barChart = renderBarChart(scores, data);
+        charts.radarChart = renderRadarChart(data);
+        charts.lineChart = renderLineChart(data);
+        charts.boxPlotChart = renderBoxPlotChart(scores);
+        charts.histogramChart = renderHistogram(scores);
+        charts.groupedBarChart = renderGroupedBarChart(data);
     }
 
     function renderBarChart(scores, data) {
-        // Calculate the average scores per user
         const averageScores = data.map(user => {
             const questionScores = Object.values(user).map(val => val * 2.5);
             return average(questionScores);
         });
 
-        return new Chart(barChartCtx, {
+        return new Chart(chartElements.barChartCtx, {
             type: 'bar',
             data: {
                 labels: scores.map((_, index) => `User ${index + 1}`),
@@ -265,12 +283,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'SUS Score'
                         },
                         grid: {
-                            color: 'rgba(75, 192, 192, 0.2)',
+                            display: false // Disable grid lines
                         },
                         ticks: {
                             callback: function(value) {
-                                return value.toFixed(0);
-                            }
+                                return [0, 50, 100].includes(value) ? value : '';
+                            },
+                            stepSize: 50, // Only show 0, 50, and 100
                         }
                     },
                     x: {
@@ -279,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'User'
                         },
                         grid: {
-                            color: 'rgba(75, 192, 192, 0.2)',
+                            display: false // Disable grid lines
                         }
                     }
                 },
@@ -324,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 },
                 onClick: (e) => {
-                    const activePoints = barChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+                    const activePoints = charts.barChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
                     if (activePoints.length > 0) {
                         const index = activePoints[0].index;
                         const userScore = scores[index];
@@ -336,31 +355,148 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function renderBoxPlotChart(scores) {
+        const avgScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+
+        return new Chart(chartElements.boxPlotChartCtx, {
+            type: 'boxplot',
+            data: {
+                labels: ['SUS Scores'],
+                datasets: [
+                    {
+                        label: 'SUS Scores',
+                        data: [scores],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        maxBarThickness: 60, // Maximum thickness of the box plot
+                        minBarLength: 10 // Minimum length of the box plot
+                    },
+                    {
+                        label: 'Mean Score',
+                        type: 'scatter',
+                        data: [{ x: 'SUS Scores', y: avgScore }],
+                        backgroundColor: 'rgba(255, 99, 132, 1)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'SUS Scores'
+                        },
+                        grid: {
+                            display: false // Disable grid lines
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return [0, 50, 100].includes(value) ? value : '';
+                            },
+                            stepSize: 50 // Only show 0, 50, and 100
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'SUS Scores'
+                        },
+                        grid: {
+                            display: false // Disable grid lines
+                        },
+                        ticks: {
+                            display: false // Hide x-axis labels
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function calculateQuantile(arr, q) {
+        const sorted = arr.slice().sort((a, b) => a - b);
+        const pos = (sorted.length - 1) * q;
+        const base = Math.floor(pos);
+        const rest = pos - base;
+        if ((sorted[base + 1] !== undefined)) {
+            return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+        } else {
+            return sorted[base];
+        }
+    }
+
+    function calculateMode(arr) {
+        const frequency = {};
+        let maxFreq = 0;
+        let mode = [];
+
+        arr.forEach(value => {
+            frequency[value] = (frequency[value] || 0) + 1;
+            if (frequency[value] > maxFreq) {
+                maxFreq = frequency[value];
+                mode = [value];
+            } else if (frequency[value] === maxFreq) {
+                mode.push(value);
+            }
+        });
+
+        return mode.length === arr.length ? [] : mode; // Return empty if no mode
+    }
+
     function renderRadarChart(data) {
-        const averageScores = {
-            Q1: average(data.map(item => item.Q1)),
-            Q2: average(data.map(item => item.Q2)),
-            Q3: average(data.map(item => item.Q3)),
-            Q4: average(data.map(item => item.Q4)),
-            Q5: average(data.map(item => item.Q5)),
-            Q6: average(data.map(item => item.Q6)),
-            Q7: average(data.map(item => item.Q7)),
-            Q8: average(data.map(item => item.Q8)),
-            Q9: average(data.map(item => item.Q9)),
-            Q10: average(data.map(item => item.Q10))
+        const medianScores = {
+            Q1: calculateMedian(data.map(item => item.Q1)),
+            Q2: calculateMedian(data.map(item => item.Q2)),
+            Q3: calculateMedian(data.map(item => item.Q3)),
+            Q4: calculateMedian(data.map(item => item.Q4)),
+            Q5: calculateMedian(data.map(item => item.Q5)),
+            Q6: calculateMedian(data.map(item => item.Q6)),
+            Q7: calculateMedian(data.map(item => item.Q7)),
+            Q8: calculateMedian(data.map(item => item.Q8)),
+            Q9: calculateMedian(data.map(item => item.Q9)),
+            Q10: calculateMedian(data.map(item => item.Q10))
         };
 
-        return new Chart(radarChartCtx, {
+        const modeScores = {
+            Q1: calculateMode(data.map(item => item.Q1))[0] || 0,
+            Q2: calculateMode(data.map(item => item.Q2))[0] || 0,
+            Q3: calculateMode(data.map(item => item.Q3))[0] || 0,
+            Q4: calculateMode(data.map(item => item.Q4))[0] || 0,
+            Q5: calculateMode(data.map(item => item.Q5))[0] || 0,
+            Q6: calculateMode(data.map(item => item.Q6))[0] || 0,
+            Q7: calculateMode(data.map(item => item.Q7))[0] || 0,
+            Q8: calculateMode(data.map(item => item.Q8))[0] || 0,
+            Q9: calculateMode(data.map(item => item.Q9))[0] || 0,
+            Q10: calculateMode(data.map(item => item.Q10))[0] || 0
+        };
+
+        return new Chart(chartElements.radarChartCtx, {
             type: 'radar',
             data: {
-                labels: Object.keys(averageScores),
-                datasets: [{
-                    label: 'Average Score',
-                    data: Object.values(averageScores),
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                }]
+                labels: Object.keys(medianScores),
+                datasets: [
+                    {
+                        label: 'Median Score',
+                        data: Object.values(medianScores),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Mode Score',
+                        data: Object.values(modeScores),
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -370,16 +506,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         angleLines: {
                             display: true
                         },
+                        grid: {
+                            display: true
+                        },
                         suggestedMin: 0,
                         suggestedMax: 5,
                         title: {
                             display: true,
-                            text: 'Average Score'
+                            text: 'Scores'
                         }
                     }
                 }
             }
         });
+    }
+
+    function calculateMedian(arr) {
+        const sorted = arr.slice().sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
     }
 
     function renderLineChart(data) {
@@ -398,7 +543,10 @@ document.addEventListener('DOMContentLoaded', () => {
             tension: 0.1
         }));
 
-        return new Chart(lineChartCtx, {
+        console.log('Line Chart Data:', lineChartData);
+        console.log('Line Chart Datasets:', datasets);
+
+        return new Chart(chartElements.lineChartCtx, {
             type: 'line',
             data: {
                 labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'],
@@ -412,73 +560,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         title: {
                             display: true,
                             text: 'Question'
+                        },
+                        grid: {
+                            display: false // Disable grid lines
                         }
                     },
                     y: {
                         title: {
                             display: true,
                             text: 'Score'
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function renderSusChart(scores) {
-        const susScoreRanges = ['Worst Imaginable', 'Poor', 'OK', 'Good', 'Excellent', 'Best Imaginable'];
-        const susScoresCount = [0, 0, 0, 0, 0, 0];
-
-        scores.forEach(score => {
-            if (score < 25) susScoresCount[0]++;
-            else if (score < 50) susScoresCount[1]++;
-            else if (score < 70) susScoresCount[2]++;
-            else if (score < 85) susScoresCount[3]++;
-            else if (score < 100) susScoresCount[4]++;
-            else susScoresCount[5]++;
-        });
-
-        return new Chart(susChartCtx, {
-            type: 'bar',
-            data: {
-                labels: susScoreRanges,
-                datasets: [{
-                    label: 'Number of Scores',
-                    data: susScoresCount,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(255, 159, 64, 0.2)',
-                        'rgba(255, 205, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(153, 102, 255, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(255, 159, 64, 1)',
-                        'rgba(255, 205, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(153, 102, 255, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Scores'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'SUS Score Range'
+                        },
+                        grid: {
+                            display: false // Disable grid lines
+                        },
+                        ticks: {
+                            stepSize: 1 // Show only 1, 2, 3, 4, 5
                         }
                     }
                 }
@@ -487,18 +583,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderHistogram(scores) {
-        const bins = Array.from({ length: 11 }, (_, i) => i * 10);
-        const histogramData = bins.map(bin => scores.filter(score => score >= bin && score < bin + 10).length);
+        const susScoreRanges = [
+            { range: '0-19', label: 'Worst Imaginable', color: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)' },
+            { range: '20-39', label: 'Poor', color: 'rgba(255, 159, 64, 0.2)', borderColor: 'rgba(255, 159, 64, 1)' },
+            { range: '40-59', label: 'OK', color: 'rgba(255, 205, 86, 0.2)', borderColor: 'rgba(255, 205, 86, 1)' },
+            { range: '60-79', label: 'Good', color: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)' },
+            { range: '80-100', label: 'Excellent/Best Imaginable', color: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgba(54, 162, 235, 1)' }
+        ];
 
-        return new Chart(histogramChartCtx, {
+        const labels = susScoreRanges.map(item => item.range);
+        const histogramDataWithLabels = susScoreRanges.map(item => {
+            const [min, max] = item.range.split('-').map(Number);
+            return scores.filter(score => score >= min && score <= max).length;
+        });
+
+        console.log('Histogram Labels:', labels);
+        console.log('Histogram Data with Labels:', histogramDataWithLabels);
+
+        return new Chart(chartElements.histogramChartCtx, {
             type: 'bar',
             data: {
-                labels: bins.map(bin => `${bin}-${bin + 9}`),
+                labels: labels,
                 datasets: [{
                     label: 'SUS Score Distribution',
-                    data: histogramData,
-                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                    borderColor: 'rgba(255, 159, 64, 1)',
+                    data: histogramDataWithLabels,
+                    backgroundColor: susScoreRanges.map(item => item.color),
+                    borderColor: susScoreRanges.map(item => item.borderColor),
                     borderWidth: 1
                 }]
             },
@@ -511,12 +621,37 @@ document.addEventListener('DOMContentLoaded', () => {
                         title: {
                             display: true,
                             text: 'Frequency'
+                        },
+                        grid: {
+                            display: false // Disable grid lines
+                        },
+                        ticks: {
+                            stepSize: 5 // Adjust based on the data
                         }
                     },
                     x: {
                         title: {
                             display: true,
-                            text: 'SUS Score Range'
+                            text: 'SUS Score Range (Adjective Rating)'
+                        },
+                        grid: {
+                            display: false // Disable grid lines
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            generateLabels: function(chart) {
+                                return susScoreRanges.map((item, index) => ({
+                                    text: item.label,
+                                    fillStyle: item.color,
+                                    strokeStyle: item.borderColor,
+                                    lineWidth: 1,
+                                    index: index
+                                }));
+                            }
                         }
                     }
                 }
@@ -531,7 +666,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const positiveScores = positiveQuestions.map(q => average(data.map(item => item[q])));
         const negativeScores = negativeQuestions.map(q => average(data.map(item => item[q])));
 
-        return new Chart(groupedBarChartCtx, {
+        console.log('Grouped Bar Chart Positive Scores:', positiveScores);
+        console.log('Grouped Bar Chart Negative Scores:', negativeScores);
+
+        return new Chart(chartElements.groupedBarChartCtx, {
             type: 'bar',
             data: {
                 labels: positiveQuestions.concat(negativeQuestions),
@@ -561,12 +699,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         title: {
                             display: true,
                             text: 'Average Score'
+                        },
+                        grid: {
+                            display: false // Disable grid lines
+                        },
+                        ticks: {
+                            stepSize: 1 // Show only 1, 2, 3, 4, 5
                         }
                     },
                     x: {
                         title: {
                             display: true,
                             text: 'Question'
+                        },
+                        grid: {
+                            display: false // Disable grid lines
                         }
                     }
                 }
@@ -591,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>SUS Score: ${averageScore.toFixed(2)}</p>
             <p>Median: ${median.toFixed(2)}</p>
             <p>Standard Deviation: ${stdDev.toFixed(2)}</p>
-            <p>Adjective Rating: ${adjective}</p>
+            <p>Adjective Rating: <span style="color: ${getAdjectiveColor(adjective)}">${adjective}</span></p>
             <p>Grade: ${grade}</p>
             <p>Acceptability: ${acceptability}</p>
         `;
@@ -611,11 +758,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateAdjectiveRating(score) {
-        if (score >= 85) return 'Excellent';
+        if (score >= 85) return 'Excellent/Best Imaginable';
         if (score >= 70) return 'Good';
         if (score >= 50) return 'OK';
         if (score >= 35) return 'Poor';
-        return 'Awful';
+        return 'Worst Imaginable';
     }
 
     function calculateGrade(score) {
@@ -632,20 +779,33 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'Not Acceptable';
     }
 
+    function getAdjectiveColor(adjective) {
+        switch (adjective) {
+            case 'Worst Imaginable': return 'rgba(255, 99, 132, 1)';
+            case 'Poor': return 'rgba(255, 159, 64, 1)';
+            case 'OK': return 'rgba(255, 205, 86, 1)';
+            case 'Good': return 'rgba(75, 192, 192, 1)';
+            case 'Excellent/Best Imaginable': return 'rgba(54, 162, 235, 1)';
+            default: return '#000000';
+        }
+    }
+
     function removeFile() {
-        document.getElementById('fileInput').value = ""; // Clear file input
-        document.getElementById('fileInfo').textContent = ""; // Clear file info
-        document.getElementById('removeFileButton').style.display = 'none'; // Hide remove button
-        uploadedFile = null; // Reset the uploadedFile variable
+        document.getElementById('fileInput').value = "";
+        document.getElementById('fileInfo').textContent = "";
+        document.getElementById('removeFileButton').style.display = 'none';
+        uploadedFile = null;
+        resetCharts();
+        updateInterpretation([]);
+        document.getElementById('dataTable').getElementsByTagName('tbody')[0].innerHTML = '';
+        checkTableData();
     }
 
     function showTab(tabId) {
-        console.log(`Showing tab: ${tabId}`);
         const tabs = document.querySelectorAll('.tab-content');
         tabs.forEach(tab => {
             if (tab.id === tabId) {
                 tab.style.display = 'block';
-                console.log(`Displaying tab: ${tabId}`);
             } else {
                 tab.style.display = 'none';
             }
@@ -659,41 +819,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkTableData() {
         const tbody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
         const noDataMessage = document.getElementById('noDataMessage');
-        console.log("Checking table data, rows count:", tbody.rows.length);
-        if (tbody.rows.length === 0) {
-            noDataMessage.style.display = 'block';
-            console.log("No data available.");
-        } else {
-            noDataMessage.style.display = 'none';
-            console.log("Data table populated.");
-        }
+        noDataMessage.style.display = (tbody.rows.length === 0) ? 'block' : 'none';
     }
 
-    // Accordion functionality
-    const accordionButtons = document.querySelectorAll('.accordion-button');
-    accordionButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            button.classList.toggle('active');
-            const content = button.nextElementSibling;
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
-        });
-    });
+    // Setup Download and Reset Buttons
+    setupDownloadAndResetButtons();
 
-    // Show the charts tab by default
-    showTab('chartsTab');
+    function setupDownloadAndResetButtons() {
+        document.getElementById('downloadBarChartBtn').addEventListener('click', () => downloadChart('barChart', 'IndividualSUSScores.png'));
+        document.getElementById('downloadRadarChartBtn').addEventListener('click', () => downloadChart('radarChart', 'AverageScoresPerQuestion.png'));
+        document.getElementById('downloadLineChartBtn').addEventListener('click', () => downloadChart('lineChart', 'ScoresAcrossQuestions.png'));
+        document.getElementById('downloadBoxPlotChartBtn').addEventListener('click', () => downloadChart('boxPlotChart', 'SUSScoring.png'));
+        document.getElementById('downloadHistogramChartBtn').addEventListener('click', () => downloadChart('histogramChart', 'SUSScoreDistribution.png'));
+        document.getElementById('downloadGroupedBarChartBtn').addEventListener('click', () => downloadChart('groupedBarChart', 'PositiveVsNegativeQuestions.png'));
+        document.getElementById('downloadCsvBtn').addEventListener('click', downloadCSV);
 
-    // Download functionality for charts
-    document.getElementById('downloadBarChartBtn').addEventListener('click', () => downloadChart('barChart', 'IndividualSUSScores.png'));
-    document.getElementById('downloadRadarChartBtn').addEventListener('click', () => downloadChart('radarChart', 'AverageScoresPerQuestion.png'));
-    document.getElementById('downloadLineChartBtn').addEventListener('click', () => downloadChart('lineChart', 'ScoresAcrossQuestions.png'));
-    document.getElementById('downloadDoughnutChartBtn').addEventListener('click', () => downloadChart('doughnutChart', 'SUSScoring.png'));
-    document.getElementById('downloadHistogramChartBtn').addEventListener('click', () => downloadChart('histogramChart', 'SUSScoreDistribution.png'));
-    document.getElementById('downloadGroupedBarChartBtn').addEventListener('click', () => downloadChart('groupedBarChart', 'PositiveVsNegativeQuestions.png'));
-    document.getElementById('downloadCsvBtn').addEventListener('click', downloadCSV);
+        document.getElementById('resetBarChartBtn').addEventListener('click', resetCharts);
+        document.getElementById('resetRadarChartBtn').addEventListener('click', resetCharts);
+        document.getElementById('resetLineChartBtn').addEventListener('click', resetCharts);
+        document.getElementById('resetBoxPlotChartBtn').addEventListener('click', resetCharts);
+        document.getElementById('resetHistogramChartBtn').addEventListener('click', resetCharts);
+        document.getElementById('resetGroupedBarChartBtn').addEventListener('click', resetCharts);
+    }
+
+    function resetCharts() {
+        renderCharts(convertedData, susScores);
+    }
 
     function downloadChart(chartId, filename) {
         const link = document.createElement('a');
@@ -718,21 +869,93 @@ document.addEventListener('DOMContentLoaded', () => {
         link.click();
     }
 
-    // Filtering functions
     function filterDataByUser(userIndex) {
         const filteredData = data.filter((_, index) => index === userIndex - 1);
         const filteredScores = susScores.filter((_, index) => index === userIndex - 1);
         renderCharts(filteredData, filteredScores);
     }
 
-    function filterDataByRating(rating) {
-        const filteredData = data.filter((_, index) => calculateAdjectiveRating(susScores[index]) === rating);
-        const filteredScores = susScores.filter(score => calculateAdjectiveRating(score) === rating);
-        renderCharts(filteredData, filteredScores);
+    async function generateReport(event) {
+        event.preventDefault(); // Prevent form submission
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const includeSummary = document.querySelector('input[name="include_summary"]').checked;
+        const includeMedian = document.querySelector('input[name="include_median"]').checked;
+        const includeVisualizations = document.querySelector('input[name="include_visualizations"]').checked;
+
+        let yOffset = 10;
+        const pageHeight = doc.internal.pageSize.height;
+
+        doc.setFontSize(18);
+        doc.text('SUS Analysis Report', 10, yOffset);
+        yOffset += 10;
+
+        if (includeSummary) {
+            const interpretationText = document.querySelector('.interpretation-panel').innerText;
+            const summaryLines = interpretationText.split('\n');
+            doc.setFontSize(12);
+            summaryLines.forEach(line => {
+                if (yOffset + 10 > pageHeight) {
+                    doc.addPage();
+                    yOffset = 10;
+                }
+                doc.text(line, 10, yOffset);
+                yOffset += 7;
+            });
+        }
+
+        if (includeMedian) {
+            if (yOffset + 20 > pageHeight) {
+                doc.addPage();
+                yOffset = 10;
+            }
+            yOffset += 10; // Add some space
+            doc.text('Median Scores:', 10, yOffset);
+            yOffset += 7;
+            const medianScores = Object.entries(calculateMedianScores(convertedData)).map(([question, score]) => `${question}: ${score.toFixed(2)}`);
+            medianScores.forEach(score => {
+                if (yOffset + 10 > pageHeight) {
+                    doc.addPage();
+                    yOffset = 10;
+                }
+                doc.text(score, 10, yOffset);
+                yOffset += 7;
+            });
+        }
+
+        if (includeVisualizations) {
+            if (yOffset + 110 > pageHeight) {
+                doc.addPage();
+                yOffset = 10;
+            }
+            yOffset += 10; // Add some space
+            const chartIds = ['barChart', 'radarChart', 'lineChart', 'boxPlotChart', 'histogramChart', 'groupedBarChart'];
+            for (let chartId of chartIds) {
+                const chartCanvas = document.getElementById(chartId);
+                if (chartCanvas) {
+                    const chartDataUrl = chartCanvas.toDataURL('image/png');
+                    doc.addImage(chartDataUrl, 'PNG', 10, yOffset, 180, 100); // Adjust size as needed
+                    yOffset += 110; // Adjust for spacing between images
+                    if (yOffset + 110 > pageHeight) {
+                        doc.addPage();
+                        yOffset = 10;
+                    }
+                    console.log(`Added ${chartId} to the report`);
+                } else {
+                    console.log(`Chart with ID ${chartId} not found`);
+                }
+            }
+        }
+
+        doc.save('SUS_Report.pdf');
     }
 
-    // Reset charts to show all data
-    function resetCharts() {
-        renderCharts(convertedData, susScores);
+    function calculateMedianScores(data) {
+        const medianScores = {};
+        for (let i = 1; i <= 10; i++) {
+            medianScores[`Q${i}`] = calculateMedian(data.map(item => item[`Q${i}`]));
+        }
+        return medianScores;
     }
 });

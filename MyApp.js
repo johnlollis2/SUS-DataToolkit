@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'SUS Score'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         },
                         ticks: {
                             callback: function(value) {
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'User'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         }
                     }
                 },
@@ -369,8 +369,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1,
-                        maxBarThickness: 60, // Maximum thickness of the box plot
-                        minBarLength: 10 // Minimum length of the box plot
+                        maxBarThickness: 60, 
+                        minBarLength: 10 
                     },
                     {
                         label: 'Mean Score',
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'SUS Scores'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         },
                         ticks: {
                             callback: function(value) {
@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'SUS Scores'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         },
                         ticks: {
                             display: false // Hide x-axis labels
@@ -562,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'Question'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         }
                     },
                     y: {
@@ -571,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'Score'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         },
                         ticks: {
                             stepSize: 1 // Show only 1, 2, 3, 4, 5
@@ -623,10 +623,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'Frequency'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         },
                         ticks: {
-                            stepSize: 5 // Adjust based on the data
+                            stepSize: 5 
                         }
                     },
                     x: {
@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'SUS Score Range (Adjective Rating)'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         }
                     }
                 },
@@ -701,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'Average Score'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         },
                         ticks: {
                             stepSize: 1 // Show only 1, 2, 3, 4, 5
@@ -713,7 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: 'Question'
                         },
                         grid: {
-                            display: false // Disable grid lines
+                            display: false // grid lines
                         }
                     }
                 }
@@ -760,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateAdjectiveRating(score) {
         if (score >= 85) return 'Excellent/Best Imaginable';
         if (score >= 70) return 'Good';
-        if (score >= 50) return 'OK';
+        if (score >= 50) return 'Kinda liked it';
         if (score >= 35) return 'Poor';
         return 'Worst Imaginable';
     }
@@ -886,15 +886,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let yOffset = 10;
         const pageHeight = doc.internal.pageSize.height;
+        const pageWidth = doc.internal.pageSize.width;
 
         doc.setFontSize(18);
-        doc.text('SUS Analysis Report', 10, yOffset);
-        yOffset += 10;
+        doc.text('SUS Analysis Report', pageWidth / 2, yOffset, { align: 'center' });
+        yOffset += 20;
 
+        // Calculate overall SUS score
+        const overallSUSScore = average(susScores);
+        let overallCategory = '';
+        let overallColor = '';
+
+        if (overallSUSScore >= 70) {
+            overallCategory = 'Liked it';
+            overallColor = '#00FF00'; // Green
+        } else if (overallSUSScore >= 50) {
+            overallCategory = 'Kinda liked it';
+            overallColor = '#FFA500'; // Orange
+        } else {
+            overallCategory = 'Didn\'t like it';
+            overallColor = '#FF0000'; // Red
+        }
+
+         // Draw "Overall Summary" title
+         doc.setFontSize(16);
+        doc.text('Overall Summary indicate that People "Check the Circle"', pageWidth / 2, yOffset, { align: 'center' });
+        yOffset += 20;
+         // Draw the circle with text
+         const circleRadius = 15;
+         const circleYCenter = yOffset + circleRadius;
+         const circleXCenter = pageWidth / 2;
+
+         doc.setFillColor(overallColor);
+         doc.circle(circleXCenter, circleYCenter, circleRadius, 'F');
+         doc.setTextColor('#FFFFFF');
+         doc.setFontSize(14); // font size for text inside the circle
+
+         // Calculate approximate text height (this is an approximation)
+         const textHeight = doc.getFontSize() * 0.352777778; // 1 point = 0.352777778 mm
+
+         // Adjust yOffset for text to be vertically centered within the circle
+         const textY = circleYCenter + (textHeight / 2);
+
+         doc.text(overallCategory, circleXCenter, textY, { align: 'center' }); // Center the text
+         yOffset += 40;
+
+        // text color 
+        doc.setTextColor('#000000');
+        doc.setFontSize(12); 
+
+        // Interpretation Section
         if (includeSummary) {
             const interpretationText = document.querySelector('.interpretation-panel').innerText;
-            const summaryLines = interpretationText.split('\n');
-            doc.setFontSize(12);
+            const summaryLines = doc.splitTextToSize(interpretationText, pageWidth - 20);
             summaryLines.forEach(line => {
                 if (yOffset + 10 > pageHeight) {
                     doc.addPage();
@@ -905,12 +949,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Median Scores Section
         if (includeMedian) {
             if (yOffset + 20 > pageHeight) {
                 doc.addPage();
                 yOffset = 10;
             }
-            yOffset += 10; // Add some space
+            yOffset += 10; 
             doc.text('Median Scores:', 10, yOffset);
             yOffset += 7;
             const medianScores = Object.entries(calculateMedianScores(convertedData)).map(([question, score]) => `${question}: ${score.toFixed(2)}`);
@@ -924,31 +969,128 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Visualizations Section
         if (includeVisualizations) {
             if (yOffset + 110 > pageHeight) {
                 doc.addPage();
                 yOffset = 10;
             }
-            yOffset += 10; // Add some space
+            yOffset += 10; 
             const chartIds = ['barChart', 'radarChart', 'lineChart', 'boxPlotChart', 'histogramChart', 'groupedBarChart'];
             for (let chartId of chartIds) {
                 const chartCanvas = document.getElementById(chartId);
                 if (chartCanvas) {
                     const chartDataUrl = chartCanvas.toDataURL('image/png');
-                    doc.addImage(chartDataUrl, 'PNG', 10, yOffset, 180, 100); // Adjust size as needed
-                    yOffset += 110; // Adjust for spacing between images
+                    doc.addImage(chartDataUrl, 'PNG', 10, yOffset, 180, 100); 
+                    yOffset += 110; 
                     if (yOffset + 110 > pageHeight) {
                         doc.addPage();
                         yOffset = 10;
                     }
-                    console.log(`Added ${chartId} to the report`);
-                } else {
-                    console.log(`Chart with ID ${chartId} not found`);
+                    const chartDescription = getChartDescription(chartId);
+                    const descriptionLines = doc.splitTextToSize(chartDescription, pageWidth - 20);
+                    descriptionLines.forEach(line => {
+                        if (yOffset + 10 > pageHeight) {
+                            doc.addPage();
+                            yOffset = 10;
+                        }
+                        doc.text(line, 10, yOffset);
+                        yOffset += 7;
+                    });
                 }
             }
         }
 
+        // Conclusion Section
+        const conclusion = generateConclusion(susScores);
+        if (conclusion) {
+            if (yOffset + 20 > pageHeight) {
+                doc.addPage();
+                yOffset = 10;
+            }
+            yOffset += 10; 
+            doc.text('Conclusion:', 10, yOffset);
+            yOffset += 7;
+            const conclusionLines = doc.splitTextToSize(conclusion, pageWidth - 20);
+            conclusionLines.forEach(line => {
+                if (yOffset + 10 > pageHeight) {
+                    doc.addPage();
+                    yOffset = 10;
+                }
+                doc.text(line, 10, yOffset);
+                yOffset += 7;
+            });
+        }
+
         doc.save('SUS_Report.pdf');
+    }
+
+    function getChartDescription(chartId) {
+        switch (chartId) {
+            case 'barChart':
+                return `This bar chart displays the unique System Usability Scale (SUS) results for each user. The mean SUS score is ${average(susScores).toFixed(2)}. The maximum score is ${Math.max(...susScores).toFixed(2)}, while the minimum score is ${Math.min(...susScores).toFixed(2)}.`;
+            case 'radarChart':
+                const medianScores = calculateMedianScores(convertedData);
+                return `This radar map illustrates the median results for each question. The medians for each question are as follows: ${Object.keys(medianScores).map(key => `${key} has a median of ${medianScores[key].toFixed(2)}`).join(', ')}.`;
+            case 'lineChart':
+                const avgScores = convertedData.map(user => average(Object.values(user)).toFixed(2)).join(', ');
+                return `This line chart displays the scores for each user's queries. The mean scores of the users are: ${avgScores}.`;
+            case 'boxPlotChart':
+                return `This box plot chart displays the distribution of SUS scores. The mean score is ${average(susScores).toFixed(2)}, the median score is ${calculateMedian(susScores).toFixed(2)}, and the standard deviation is ${calculateStandardDeviation(susScores).toFixed(2)}.`;
+            case 'histogramChart':
+                const susScoreRanges = [
+                    { range: '0-19', label: 'Worst Imaginable' },
+                    { range: '20-39', label: 'Poor' },
+                    { range: '40-59', label: 'OK' },
+                    { range: '60-79', label: 'Good' },
+                    { range: '80-100', label: 'Excellent/Best Imaginable' }
+                ];
+                const histogramDataWithLabels = susScoreRanges.map(item => {
+                    const [min, max] = item.range.split('-').map(Number);
+                    return susScores.filter(score => score >= min && score <= max).length;
+                });
+                return `This histogram displays the frequency distribution of SUS scores. The frequency of scores within each range are as follows: ${susScoreRanges.map((item, index) => `${item.range}: ${histogramDataWithLabels[index]}`).join(', ')}.`;
+            case 'groupedBarChart':
+                const positiveQuestions = ['Q1', 'Q3', 'Q5', 'Q7', 'Q9'];
+                const negativeQuestions = ['Q2', 'Q4', 'Q6', 'Q8', 'Q10'];
+                const positiveScores = positiveQuestions.map(q => average(convertedData.map(item => item[q])));
+                const negativeScores = negativeQuestions.map(q => average(convertedData.map(item => item[q])));
+                return `This bar chart displays the average scores of positive and negative questions in a grouped format for comparison. The mean scores for affirmative enquiries are ${positiveScores.map(score => score.toFixed(2)).join(', ')}. The mean scores for negative questions are: ${negativeScores.map(score => score.toFixed(2)).join(', ')}.`;
+            default:
+                return '';
+        }
+    }
+
+    function generateConclusion(scores) {
+        const averageScore = average(scores);
+        const adjective = calculateAdjectiveRating(averageScore);
+
+        return `The system's usability is assessed as "${adjective}" based on the average SUS score of ${averageScore.toFixed(2)}. This suggests that the overall user experience is ${adjective.toLowerCase()}.`;
+    }
+
+    function average(arr) {
+        return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    function calculateMedian(arr) {
+        const sorted = arr.slice().sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
+    function calculateStandardDeviation(arr) {
+        const avg = average(arr);
+        const squareDiffs = arr.map(value => Math.pow(value - avg, 2));
+        const avgSquareDiff = average(squareDiffs);
+        return Math.sqrt(avgSquareDiff);
+    }
+
+    function calculateAdjectiveRating(score) {
+        if (score >= 85) return 'Excellent/Best Imaginable';
+        if (score >= 70) return 'Good';
+        if (score >= 50) return 'Kinda liked it';
+        if (score >= 35) return 'Poor';
+        return 'Worst Imaginable';
     }
 
     function calculateMedianScores(data) {

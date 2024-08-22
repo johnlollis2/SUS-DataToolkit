@@ -111,6 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // expected headers on CSV file
+        const expectedHeaders = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'];
+
         Papa.parse(uploadedFile, {
             header: true,
             dynamicTyping: true,
@@ -118,6 +121,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (results.errors.length) {
                     console.error("Errors in CSV parsing:", results.errors);
                     alert("Error parsing file. Please check the CSV format.");
+                    return;
+                }
+                const actualHeaders = results.meta.fields; // Get the headers from the CSV
+
+                // Check if the headers match the expected ones
+                const headersMatch = expectedHeaders.every(header => actualHeaders.includes(header)) &&
+                                     actualHeaders.every(header => expectedHeaders.includes(header));
+    
+                if (!headersMatch) {
+                    alert("The uploaded CSV file has incorrect variable names. Please upload a file with the correct headers.");
                     return;
                 }
 
@@ -795,8 +808,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('fileInfo').textContent = "";
         document.getElementById('removeFileButton').style.display = 'none';
         uploadedFile = null;
+
+        // Clear all the data!
+        data = [];
+        convertedData = [];
+        susScores = [];
+        // Resetting charts and interpretation data!
         resetCharts();
         updateInterpretation([]);
+        // Clear the data table out!
         document.getElementById('dataTable').getElementsByTagName('tbody')[0].innerHTML = '';
         checkTableData();
     }

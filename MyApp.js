@@ -7,10 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
         histogramChartCtx: document.getElementById('histogramChart').getContext('2d'),
         groupedBarChartCtx: document.getElementById('groupedBarChart').getContext('2d')
     };
-
+    // File iput element and drop area for file drag and drop functionality
     const fileInput = document.getElementById('fileInput');
     const dropArea = document.getElementById('drop-area');
 
+    // Fill storage and processed data
     let uploadedFile = null;
     let data = [];
     let convertedData = [];
@@ -28,11 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDragAndDrop();
     setupAccordion();
 
+    // Function for  sideabr listeners for tab navigation
     function setupSidebarListeners() {
         document.querySelector('.sidebar-list-item:nth-child(1)').addEventListener('click', () => showTab('chartsTab'));
         document.querySelector('.sidebar-list-item:nth-child(2)').addEventListener('click', () => showTab('dataTableTab'));
     }
 
+    // Function for drag and drop file handling
     function setupDragAndDrop() {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, preventDefaults, false);
@@ -50,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dropArea.addEventListener('drop', handleDrop, false);
     }
 
+    // Function for accordion menu
     function setupAccordion() {
         document.querySelectorAll('.accordion-button').forEach(button => {
             button.addEventListener('click', () => {
@@ -65,16 +69,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-
+    
+    // Function to  prevent default behavior of D&D events
     function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
     }
-
+    
+    // Function to handle file drop events
     function handleDrop(e) {
         handleFiles(e.dataTransfer.files);
     }
-
+    
+    // Function for file upload handling
     function handleFiles(files) {
         if (files.length > 0) {
             const file = files[0];
@@ -87,7 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
+    
+    // Function to handle file upload via file selection
     function handleFileUpload(event) {
         const file = event.target.files[0];
         if (file && file.type === 'text/csv') {
@@ -98,13 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
             displayInvalidFileMessage();
         }
     }
-
+    
+    // Function for displaying error message when input is invalid
     function displayInvalidFileMessage() {
         document.getElementById('fileInfo').textContent = "Please select a valid CSV file.";
         document.getElementById('removeFileButton').style.display = 'none';
         uploadedFile = null;
     }
-
+    
+    // process the uploaded CSV File Function
     function processFile() {
         if (!uploadedFile) {
             alert("Please upload a CSV file first.");
@@ -113,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // expected headers on CSV file
         const expectedHeaders = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'];
-
+        
+        // Parcing CSV file using PapaParser function
         Papa.parse(uploadedFile, {
             header: true,
             dynamicTyping: true,
@@ -139,7 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert("CSV file is empty or not properly formatted.");
                     return;
                 }
-
+                
+                // Convert data to adjusted format
                 convertedData = data.map(convertToAdjustedData);
                 susScores = calculateSUSScores(convertedData);
                 if (!susScores) {
@@ -149,7 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 console.log('Converted Data:', convertedData);
                 console.log('SUS Scores:', susScores);
-
+                
+                // Update charts and table
                 updateDataTable(convertedData, susScores);
                 renderCharts(convertedData, susScores);
                 updateInterpretation(susScores);
@@ -161,7 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
+    
+    // Function to convert CSv into adjusted SUS scores
     function convertToAdjustedData(item) {
         return {
             Q1: item.Q1 - 1,
@@ -176,7 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
             Q10: 5 - item.Q10
         };
     }
-
+    
+    // Functiona to calculate SUS score
     function calculateSUSScores(data) {
         try {
             return data.map(item => {
@@ -189,7 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
     }
-
+    
+    // Function to update data table with converted data and SUS scores
     function updateDataTable(data, scores) {
         const tbody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
         tbody.innerHTML = "";
@@ -215,7 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
         addAverageRow(data, scores);
         checkTableData();
     }
-
+    
+    // Add raw with average scores to the table data
     function addAverageRow(data, scores) {
         const tbody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
         const tr = document.createElement('tr');
@@ -237,7 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.appendChild(tr);
     }
-
+    
+    // Function for rendering various charts based on the actual processed data
     function renderCharts(data, scores) {
         // Destroy existing charts if any
         Object.values(charts).forEach(chart => chart.destroy());
@@ -250,7 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
         charts.histogramChart = renderHistogram(scores);
         charts.groupedBarChart = renderGroupedBarChart(data);
     }
-
+    
+    // Function for bar chart
     function renderBarChart(scores, data) {
         const averageScores = data.map(user => {
             const questionScores = Object.values(user).map(val => val * 2.5);
@@ -367,7 +386,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
+    
+    // Box plot function
     function renderBoxPlotChart(scores) {
         const avgScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
 
@@ -432,7 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
+    
+    // Quatiles calculation used for BP calculation
     function calculateQuantile(arr, q) {
         const sorted = arr.slice().sort((a, b) => a - b);
         const pos = (sorted.length - 1) * q;
@@ -444,7 +465,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return sorted[base];
         }
     }
-
+    
+    // Function to calculate the mode of an array
     function calculateMode(arr) {
         const frequency = {};
         let maxFreq = 0;
@@ -462,7 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return mode.length === arr.length ? [] : mode; // Return empty if no mode
     }
-
+    
+    // Radar cahrt function
     function renderRadarChart(data) {
         const medianScores = {
             Q1: calculateMedian(data.map(item => item.Q1)),
@@ -533,13 +556,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
+    
+    // median of array culculation
     function calculateMedian(arr) {
         const sorted = arr.slice().sort((a, b) => a - b);
         const mid = Math.floor(sorted.length / 2);
         return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
     }
-
+    
+    // Line chart function
     function renderLineChart(data) {
         const lineChartData = [];
         data.forEach((row, index) => {
@@ -594,7 +619,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
+    
+    // Function for rendering a historgram chart
     function renderHistogram(scores) {
         const susScoreRanges = [
             { range: '0-19', label: 'Worst Imaginable', color: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)' },
@@ -671,7 +697,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
+    
+    // Functiona rendring a grouped bar chart (Positive vs negative)
     function renderGroupedBarChart(data) {
         const positiveQuestions = ['Q1', 'Q3', 'Q5', 'Q7', 'Q9'];
         const negativeQuestions = ['Q2', 'Q4', 'Q6', 'Q8', 'Q10'];
@@ -737,7 +764,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function average(arr) {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
-
+    
+    // Function to update the IP
     function updateInterpretation(scores) {
         const averageScore = average(scores);
         const median = calculateMedian(scores);
@@ -756,20 +784,23 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>Acceptability: ${acceptability}</p>
         `;
     }
-
+    
+    // Median score calculation
     function calculateMedian(arr) {
         const sorted = arr.slice().sort((a, b) => a - b);
         const mid = Math.floor(sorted.length / 2);
         return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
     }
-
+    
+    // Standard deviation calculation
     function calculateStandardDeviation(arr) {
         const avg = average(arr);
         const squareDiffs = arr.map(value => Math.pow(value - avg, 2));
         const avgSquareDiff = average(squareDiffs);
         return Math.sqrt(avgSquareDiff);
     }
-
+    
+    // Adjective rating calculation
     function calculateAdjectiveRating(score) {
         if (score >= 85) return 'Excellent/Best Imaginable';
         if (score >= 70) return 'Good';
@@ -777,7 +808,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (score >= 35) return 'Poor';
         return 'Worst Imaginable';
     }
-
+    
+    // Grade calculation
     function calculateGrade(score) {
         if (score >= 85) return 'A';
         if (score >= 70) return 'B';
@@ -785,13 +817,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (score >= 35) return 'D';
         return 'F';
     }
-
+    
+    // Acceptability calculation
     function calculateAcceptability(score) {
         if (score >= 70) return 'Acceptable';
         if (score >= 50) return 'Marginal';
         return 'Not Acceptable';
     }
-
+    
+    // Color corresponding to the Adj rating
     function getAdjectiveColor(adjective) {
         switch (adjective) {
             case 'Worst Imaginable': return 'rgba(255, 99, 132, 1)';
@@ -802,7 +836,8 @@ document.addEventListener('DOMContentLoaded', () => {
             default: return '#000000';
         }
     }
-
+    
+    // Function to reset all the charts and interpretation data
     function removeFile() {
         document.getElementById('fileInput').value = "";
         document.getElementById('fileInfo').textContent = "";
@@ -813,14 +848,17 @@ document.addEventListener('DOMContentLoaded', () => {
         data = [];
         convertedData = [];
         susScores = [];
+
         // Resetting charts and interpretation data!
         resetCharts();
         updateInterpretation([]);
+
         // Clear the data table out!
         document.getElementById('dataTable').getElementsByTagName('tbody')[0].innerHTML = '';
         checkTableData();
     }
-
+    
+    // Hide tab functionality
     function showTab(tabId) {
         const tabs = document.querySelectorAll('.tab-content');
         tabs.forEach(tab => {
@@ -835,7 +873,8 @@ document.addEventListener('DOMContentLoaded', () => {
             checkTableData();
         }
     }
-
+    
+    // Function to seek for data in the tabel 
     function checkTableData() {
         const tbody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
         const noDataMessage = document.getElementById('noDataMessage');
@@ -861,18 +900,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resetHistogramChartBtn').addEventListener('click', resetCharts);
         document.getElementById('resetGroupedBarChartBtn').addEventListener('click', resetCharts);
     }
-
+    
+    // chart reset function
     function resetCharts() {
         renderCharts(convertedData, susScores);
     }
-
+    
+    // Function to download the chart as a PNG
     function downloadChart(chartId, filename) {
         const link = document.createElement('a');
         link.href = document.getElementById(chartId).toDataURL('image/png');
         link.download = filename;
         link.click();
     }
-
+    
+    // Function to download the CSV file with the data table
     function downloadCSV() {
         const rows = document.querySelectorAll('#dataTable tr');
         let csvContent = '';
@@ -888,13 +930,15 @@ document.addEventListener('DOMContentLoaded', () => {
         link.download = 'SUS_Data.csv';
         link.click();
     }
-
+    
+    // Filter data by user
     function filterDataByUser(userIndex) {
         const filteredData = data.filter((_, index) => index === userIndex - 1);
         const filteredScores = susScores.filter((_, index) => index === userIndex - 1);
         renderCharts(filteredData, filteredScores);
     }
-
+    
+    // Function to generate a PDF report
     async function generateReport(event) {
         event.preventDefault(); // Prevent form submission
 
@@ -932,6 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
          doc.setFontSize(16);
         doc.text('Overall Summary indicate that People "Check the Circle"', pageWidth / 2, yOffset, { align: 'center' });
         yOffset += 20;
+
          // Draw the circle with text
          const circleRadius = 15;
          const circleYCenter = yOffset + circleRadius;
@@ -942,8 +987,8 @@ document.addEventListener('DOMContentLoaded', () => {
          doc.setTextColor('#FFFFFF');
          doc.setFontSize(14); // font size for text inside the circle
 
-         // Calculate approximate text height (this is an approximation)
-         const textHeight = doc.getFontSize() * 0.352777778; // 1 point = 0.352777778 mm
+         // Calculate text height 
+         const textHeight = doc.getFontSize() * 0.352777778;
 
          // Adjust yOffset for text to be vertically centered within the circle
          const textY = circleYCenter + (textHeight / 2);
@@ -1044,7 +1089,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         doc.save('SUS_Report.pdf');
     }
-
+    
+    // Function to get a description for each chart used in the Report
     function getChartDescription(chartId) {
         switch (chartId) {
             case 'barChart':
@@ -1080,31 +1126,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 return '';
         }
     }
-
+    
+    // Function to generate a summary of the interpretation section
     function generateConclusion(scores) {
         const averageScore = average(scores);
         const adjective = calculateAdjectiveRating(averageScore);
 
         return `The system's usability is assessed as "${adjective}" based on the average SUS score of ${averageScore.toFixed(2)}. This suggests that the overall user experience is ${adjective.toLowerCase()}.`;
     }
-
+    
+    // Function to calculate the average of an array of numbers
     function average(arr) {
         return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
-
+    // Function to calculate the median of an array of numbers
     function calculateMedian(arr) {
         const sorted = arr.slice().sort((a, b) => a - b);
         const mid = Math.floor(sorted.length / 2);
         return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
     }
-
+    // Function to calculate the standard deviation of an array of numbers
     function calculateStandardDeviation(arr) {
         const avg = average(arr);
         const squareDiffs = arr.map(value => Math.pow(value - avg, 2));
         const avgSquareDiff = average(squareDiffs);
         return Math.sqrt(avgSquareDiff);
     }
-
+    // Function to convert the data to the required format
     function calculateAdjectiveRating(score) {
         if (score >= 85) return 'Excellent/Best Imaginable';
         if (score >= 70) return 'Good';
@@ -1112,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (score >= 35) return 'Poor';
         return 'Worst Imaginable';
     }
-
+    // Function to calculate the median scores for each question in the data
     function calculateMedianScores(data) {
         const medianScores = {};
         for (let i = 1; i <= 10; i++) {
